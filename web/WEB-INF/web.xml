@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+    <filter>
+        <filter-name>authFilter</filter-name>
+        <filter-class>kelas_java.authFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>authFilter</filter-name>
+        
+        <url-pattern>/_home_admin</url-pattern>
+        <url-pattern>/_urusanPengiriman</url-pattern>
+        <url-pattern>/simpan_urusanPengiriman</url-pattern>
+        <url-pattern>/simpanperubahanpada_urusanPengiriman</url-pattern>
+        <url-pattern>/viewdetail_urusanPengiriman</url-pattern>
+        <url-pattern>/view_urusanPengiriman</url-pattern>
+        <url-pattern>/dohapusdata_urusanPengiriman</url-pattern>
+        <url-pattern>/confirmhapusdata_urusanPengiriman</url-pattern>
+        <url-pattern>/_urusanPembayaran</url-pattern>
+        <url-pattern>/simpan_urusanPembayaran</url-pattern>
+        <url-pattern>/simpanperubahanpada_urusanPembayaran</url-pattern>
+        <url-pattern>/viewdetail_urusanPembayaran</url-pattern>
+        <url-pattern>/view_urusanPembayaran</url-pattern>
+        <url-pattern>/dohapusdata_urusanPembayaran</url-pattern>
+        <url-pattern>/confirmhapusdata_urusanPembayaran</url-pattern>
+        <url-pattern>/_x_pengaturanakunAdmin</url-pattern>
+        <url-pattern>/_x_pengaturanakunAdminLakukanPerubahan</url-pattern>
+        <url-pattern>/simpan_urusanToko</url-pattern>
+        <url-pattern>/view_urusanToko</url-pattern>
+        <url-pattern>/confirmhapusdata_urusanToko</url-pattern>
+        <url-pattern>/dohapusdata_urusanToko</url-pattern>
+        <url-pattern>/_urusanToko</url-pattern>
+        
+        
+        <url-pattern>/_home_cust</url-pattern>
+        
+        
+        <url-pattern>/_home_seller</url-pattern>
+    </filter-mapping>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/halaman404.html</location>
+    </error-page>
+</web-app>

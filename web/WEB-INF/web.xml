@@ -34,7 +34,9 @@
         <url-pattern>/confirmhapusdata_urusanToko</url-pattern>
         <url-pattern>/dohapusdata_urusanToko</url-pattern>
         <url-pattern>/_urusanToko</url-pattern>
-        
+        <url-pattern>/view_urusanProduk</url-pattern>
+        <url-pattern>/confirmhapusdata_urusanProduk</url-pattern>
+        <url-pattern>/dohapusdata_urusanProduk</url-pattern>
         
         <url-pattern>/_home_cust</url-pattern>
         

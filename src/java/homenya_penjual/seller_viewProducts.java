@@ -384,7 +384,7 @@ public class seller_viewProducts extends HttpServlet {
                                     + "      <div class=\"panel panel-primary\">\n"
                                     + "        <div class=\"panel-heading\">"+products.get(i).getNama_produk()+"</div>\n"
                                     + "        <div class=\"panel-body\"><img src=\"./productImage_loader?idProduk_="+products.get(i).getId_produk()+"\" class=\"img-responsive\" style=\"width:100%\" alt=\"Image\"></div>\n"
-                                    + "        <div class=\"panel-footer\">Buy 50 mobiles and get a gift card</div>\n"
+                                    + "        <div class=\"panel-footer\" onclick=\"location.href='./seller_viewProductDetails';\" style=\"cursor: pointer;\">Lihat Detail</div>\n"
                                     + "      </div>\n"
                                     + "    </div>");
                         }

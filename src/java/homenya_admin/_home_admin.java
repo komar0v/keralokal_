@@ -77,12 +77,12 @@ public class _home_admin extends HttpServlet {
                         jumlah_user = rs3.getInt("jumlahcustomer");
                     }
                     
-                    PreparedStatement psjmlhmetodekirim = conn.prepareStatement("SELECT COUNT(*) AS jumlahmetodekirim FROM tabel_kurir");
-                    ResultSet rs4 = psjmlhmetodekirim.executeQuery();
-                    int jumlah_metodekirim=0;
+                    PreparedStatement psjmlhproduk = conn.prepareStatement("SELECT COUNT(*) AS jumlahbarang FROM tabel_produk");
+                    ResultSet rs4 = psjmlhproduk.executeQuery();
+                    int jumlah_barangOnline=0;
                     
                     while(rs4.next()){
-                        jumlah_metodekirim = rs4.getInt("jumlahmetodekirim");
+                        jumlah_barangOnline = rs4.getInt("jumlahbarang");
                     }
 
                     try {
@@ -655,9 +655,9 @@ public class _home_admin extends HttpServlet {
                                 + "				</div>\n"
                                 + "				<div class=\"col-xs-6 col-md-3 col-lg-3 no-padding\">\n"
                                 + "					<div class=\"panel panel-red panel-widget \">\n"
-                                + "						<div class=\"row no-padding\"><em class=\"fa fa-xl fa-truck\"></em>\n"
-                                + "							<div class=\"large\">"+jumlah_metodekirim+"</div>\n"
-                                + "							<div class=\"text-muted\">Metode Pengiriman Tersedia</div>\n"
+                                + "						<div class=\"row no-padding\"><em class=\"fa fa-xl fa-sitemap\"></em>\n"
+                                + "							<div class=\"large\">"+jumlah_barangOnline+"</div>\n"
+                                + "							<div class=\"text-muted\">Produk Tersedia Online</div>\n"
                                 + "						</div>\n"
                                 + "					</div>\n"
                                 + "				</div>\n"

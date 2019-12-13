@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -18,34 +19,40 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import kelas_java.OBJ_produk;
 import kelas_java.db_connection;
 
 /**
  *
  * @author ASUS
  */
-@WebServlet(name = "_home_admin", urlPatterns = {"/_home_admin"})
-public class _home_admin extends HttpServlet {
+@WebServlet(name = "view_urusanProduk", urlPatterns = {"/view_urusanProduk"})
+public class view_urusanProduk extends HttpServlet {
 
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         PrintWriter out = response.getWriter();
-        String nama_user = null;
         String idAkun = null;
         String levelAkun = null;
 
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("namaUser")) {
-                    nama_user = cookie.getValue();
+                if (cookie.getName().equals("levelAkun")) {
+                    levelAkun = cookie.getValue();
                 }
                 if (cookie.getName().equals("idAkun")) {
                     idAkun = cookie.getValue();
-                }
-                if (cookie.getName().equals("levelAkun")) {
-                    levelAkun = cookie.getValue();
                 }
             }
             if (levelAkun.equals("admin")) {
@@ -53,49 +60,33 @@ public class _home_admin extends HttpServlet {
                     Class.forName("com.mysql.jdbc.Driver");
                     Connection conn = db_connection.connect_to_Db();
 
-                    PreparedStatement psjmlhmetodebayar = conn.prepareStatement("SELECT COUNT(*) AS jumlahmetodebayar FROM tabel_metodebayar");
-                    ResultSet rs1 = psjmlhmetodebayar.executeQuery();
-                    int jumlah_metodebayar = 0;
+                    PreparedStatement ps = conn.prepareStatement("SELECT product_id, nama_produk, jenis_produk FROM tabel_produk");
+                    ResultSet rs = ps.executeQuery();
 
-                    while (rs1.next()) {
-                        jumlah_metodebayar = rs1.getInt("jumlahmetodebayar");
+                    ArrayList<OBJ_produk> produk = new ArrayList<OBJ_produk>();
+                    int urutan = 0;
+                    while (rs.next()) {
+
+                        OBJ_produk dftr_produk = new OBJ_produk();
+                        dftr_produk.setId_produk(Integer.toString(rs.getInt("product_id")));
+                        dftr_produk.setNama_produk(rs.getString("nama_produk"));
+                        dftr_produk.setJenis_produk(rs.getString("jenis_produk"));
+
+                        produk.add(dftr_produk);
                     }
-
-                    PreparedStatement psjmlhtoko = conn.prepareStatement("SELECT COUNT(*) AS jumlahtoko FROM tabel_toko");
-                    ResultSet rs2 = psjmlhtoko.executeQuery();
-                    int jumlah_toko = 0;
-
-                    while (rs2.next()) {
-                        jumlah_toko = rs2.getInt("jumlahtoko");
-                    }
-
-                    PreparedStatement psjmlhcustomer = conn.prepareStatement("SELECT COUNT(*) AS jumlahcustomer FROM tabel_customer");
-                    ResultSet rs3 = psjmlhcustomer.executeQuery();
-                    int jumlah_user = 0;
-
-                    while (rs3.next()) {
-                        jumlah_user = rs3.getInt("jumlahcustomer");
-                    }
-
-                    PreparedStatement psjmlhproduk = conn.prepareStatement("SELECT COUNT(*) AS jumlahbarang FROM tabel_produk");
-                    ResultSet rs4 = psjmlhproduk.executeQuery();
-                    int jumlah_barangOnline = 0;
-
-                    while (rs4.next()) {
-                        jumlah_barangOnline = rs4.getInt("jumlahbarang");
-                    }
-
                     try {
                         out.println("<!DOCTYPE html>\n"
                                 + "<html lang=\"en\" >\n"
                                 + "<head>\n"
                                 + "  <meta charset=\"UTF-8\">\n"
                                 + "  <title>Admin Panel</title>\n"
-                                + "  <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css\">\n"
-                                + "<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css'>\n"
+                                + "  <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css\">"
+                                + "  <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/icon?family=Material+Icons\">\n"
+                                + "  <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css'>\n"
+                                + "  <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js\"></script>"
                                 + "<style type=\"text/css\">\n"
                                 + "@import \"https://designmodo.github.io/Flat-UI/dist/css/flat-ui.min.css\";\n"
-                                + "@import \"https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css\";\n"
+                                + "@import \"https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css\";\n"
                                 + "@import \"https://daneden.github.io/animate.css/animate.min.css\";\n"
                                 + "/*-------------------------------*/\n"
                                 + "/*           VARIABLES           */\n"
@@ -365,161 +356,100 @@ public class _home_admin extends HttpServlet {
                                 + "  display: block;\n"
                                 + "  opacity: 1;\n"
                                 + "}"
-                                + ".panel {\n"
-                                + "  border: 0; }\n"
-                                + "\n"
-                                + ".panel-container {\n"
-                                + "  padding-top: 20px; }\n"
-                                + "\n"
-                                + ".panel-heading .fa-toggle-up, .panel-heading .fa-toggle-down {\n"
-                                + "  font-size: 17px; }\n"
-                                + "\n"
-                                + ".panel-primary > .panel-heading {\n"
-                                + "  background-color: #30a5ff;\n"
-                                + "  color: #fff;\n"
-                                + "  border: none; }\n"
-                                + "\n"
-                                + ".panel-success > .panel-heading {\n"
-                                + "  background-color: #8ad919;\n"
-                                + "  color: #fff;\n"
-                                + "  border: none; }\n"
-                                + "\n"
-                                + ".panel-info > .panel-heading {\n"
-                                + "  background-color: #30a5ff;\n"
-                                + "  color: #fff;\n"
-                                + "  border: none; }\n"
-                                + "\n"
-                                + ".panel-warning > .panel-heading {\n"
-                                + "  background-color: #ffb53e;\n"
-                                + "  color: #fff;\n"
-                                + "  border: none; }\n"
-                                + "\n"
-                                + ".panel-danger > .panel-heading {\n"
-                                + "  background-color: #f9243f;\n"
-                                + "  color: #fff;\n"
-                                + "  border: none; }\n"
-                                + "\n"
-                                + ".panel-primary .panel-settings, .panel-primary .panel-toggle, .panel-success .panel-settings, .panel-success .panel-toggle, .panel-info .panel-settings, .panel-info .panel-toggle, .panel-warning .panel-settings, .panel-warning .panel-toggle, .panel-danger .panel-settings, .panel-danger .panel-toggle {\n"
-                                + "  border: none;\n"
-                                + "  color: #fff;\n"
-                                + "  background-color: rgba(255, 255, 255, 0.2); }\n"
-                                + "\n"
-                                + ".panel-primary .panel-settings:hover, .panel-primary .panel-toggle:hover, .panel-success .panel-settings:hover, .panel-success .panel-toggle:hover, .panel-info .panel-settings:hover, .panel-info .panel-toggle:hover, .panel-warning .panel-settings:hover, .panel-warning .panel-toggle:hover, .panel-danger .panel-settings:hover, .panel-danger .panel-toggle:hover {\n"
-                                + "  border: none;\n"
-                                + "  color: #fff;\n"
-                                + "  background-color: rgba(255, 255, 255, 0.4); }\n"
-                                + "\n"
-                                + ".panel-blue {\n"
-                                + "  background: #30a5ff;\n"
-                                + "  color: #fff; }\n"
-                                + "\n"
-                                + ".panel-teal {\n"
-                                + "  background: #1ebfae;\n"
-                                + "  color: #fff; }\n"
-                                + "\n"
-                                + ".panel-orange {\n"
-                                + "  background: #ffb53e;\n"
-                                + "  color: #fff; }\n"
-                                + "\n"
-                                + ".panel-red {\n"
-                                + "  background: #f9243f;\n"
-                                + "  color: #fff; }\n"
-                                + "\n"
-                                + ".dark-overlay {\n"
-                                + "  background: rgba(0, 0, 0, 0.05); }\n"
-                                + "\n"
-                                + ".panel-blue p, .panel-teal p, .panel-orange p, .panel-red p {\n"
-                                + "  color: rgba(255, 255, 255, 0.75); }\n"
-                                + "\n"
-                                + ".panel-heading {\n"
-                                + "  font-size: 20px;\n"
-                                + "  font-weight: 300;\n"
-                                + "  letter-spacing: 0.025em;\n"
-                                + "  height: 60px;\n"
-                                + "  line-height: 38px; }\n"
-                                + "\n"
-                                + ".panel-default .panel-heading {\n"
-                                + "  background: #fff;\n"
-                                + "  border-bottom: 1px solid #e9ecf2;\n"
-                                + "  color: #444444; }\n"
-                                + "\n"
-                                + ".panel-footer {\n"
-                                + "  background: #fff;\n"
-                                + "  border-top: 1px solid #e9ecf2; }\n"
-                                + "\n"
-                                + ".panel-widget {\n"
-                                + "  padding: 10px 0;\n"
-                                + "  position: relative;\n"
-                                + "  box-shadow: none;\n"
-                                + "  border-radius: 0;\n"
-                                + "  background: none;\n"
-                                + "  text-align: center;\n"
-                                + "  color: #333; }\n"
-                                + "\n"
-                                + ".panel-widget .panel-footer {\n"
-                                + "  border: 0;\n"
-                                + "  text-align: center; }\n"
-                                + "\n"
-                                + ".panel-footer .input-group {\n"
-                                + "  padding: 0px;\n"
-                                + "  margin: 0 -5px; }\n"
-                                + "\n"
-                                + ".panel-footer .input-group-btn:last-child > .btn, .panel-footer .input-group-btn:last-child > .btn-group {\n"
-                                + "  margin: 0; }\n"
-                                + "\n"
-                                + ".panel-widget .panel-footer a {\n"
-                                + "  color: #999; }\n"
-                                + "\n"
-                                + ".panel-widget .panel-footer a:hover {\n"
-                                + "  color: #666;\n"
-                                + "  text-decoration: none; }\n"
-                                + "\n"
-                                + ".panel-widget .text-muted {\n"
-                                + "  margin-top: -6px;\n"
-                                + "  text-transform: uppercase;\n"
-                                + "  font-weight: bold;\n"
-                                + "  font-size: 0.8em; }\n"
-                                + "\n"
-                                + ".panel-widget .large {\n"
-                                + "  color: #373b45;\n"
-                                + "  font-size: 3em; }\n"
-                                + "\n"
-                                + ".panel-settings {\n"
-                                + "  list-style: none;\n"
-                                + "  padding: 0;\n"
-                                + "  margin: 0; }\n"
-                                + "\n"
-                                + ".panel-settings .dropdown a.dropdown-toggle, .panel-settings a {\n"
-                                + "  padding: 0;\n"
-                                + "  background: none;\n"
-                                + "  color: #7c7c7c; }\n"
-                                + "\n"
-                                + ".panel-settings a, .panel-toggle {\n"
-                                + "  width: 40px;\n"
-                                + "  padding: 2px 0 0 0; }\n"
-                                + "\n"
-                                + ".panel-settings:hover, .panel-toggle:hover, .panel-settings .dropdown a.dropdown-toggle:hover, .panel-settings:active, .panel-toggle:active, .panel-settings .dropdown a.dropdown-toggle:active, .panel-settings:focus, .panel-toggle:focus, .panel-settings .dropdown a.dropdown-toggle:focus {\n"
-                                + "  background: #f1f4f7;\n"
-                                + "  color: #444444; }\n"
-                                + "\n"
-                                + ".panel-settings, .panel-toggle {\n"
-                                + "  display: inline-block;\n"
-                                + "  margin: -1px -5px 0 15px !important;\n"
-                                + "  border-radius: 4px;\n"
-                                + "  text-align: center;\n"
-                                + "  border: 1px solid #e9ecf2;\n"
-                                + "  color: #7c7c7c;\n"
-                                + "  background: #fff;\n"
-                                + "  width: 42px; }\n"
-                                + "\n"
-                                + ".panel-settings {\n"
-                                + "  width: 42px;\n"
-                                + "  border-top-right-radius: 4px;\n"
-                                + "  border-bottom-right-radius: 4px; }\n"
-                                + "\n"
-                                + ".panel-settings li.dropdown {\n"
-                                + "  margin: 0;\n"
-                                + "  padding: 0; }\n"
+                                + ".table-wrapper {\n"
+                                + "        background: #fff;\n"
+                                + "        padding: 20px 25px;\n"
+                                + "        margin: 30px auto;\n"
+                                + "		border-radius: 3px;\n"
+                                + "        box-shadow: 0 1px 1px rgba(0,0,0,.05);\n"
+                                + "    }\n"
+                                + "    .table-title {\n"
+                                + "		color: #fff;\n"
+                                + "		background: #40b2cd;		\n"
+                                + "		padding: 16px 25px;\n"
+                                + "		margin: -20px -25px 10px;\n"
+                                + "		border-radius: 3px 3px 0 0;\n"
+                                + "    }\n"
+                                + "    .table-title h2 {\n"
+                                + "        margin: 5px 0 0;\n"
+                                + "        font-size: 24px;\n"
+                                + "    }\n"
+                                + "	.search-box {\n"
+                                + "        position: relative;\n"
+                                + "        float: right;\n"
+                                + "    }\n"
+                                + "	.search-box .input-group {\n"
+                                + "		min-width: 300px;\n"
+                                + "		position: absolute;\n"
+                                + "		right: 0;\n"
+                                + "	}\n"
+                                + "	.search-box .input-group-addon, .search-box input {\n"
+                                + "		border-color: #ddd;\n"
+                                + "		border-radius: 0;\n"
+                                + "	}	\n"
+                                + "    .search-box input {\n"
+                                + "        height: 34px;\n"
+                                + "        padding-right: 35px;\n"
+                                + "        background: #f4fcfd;\n"
+                                + "        border: none;\n"
+                                + "        border-radius: 2px !important;\n"
+                                + "    }\n"
+                                + "	.search-box input:focus {\n"
+                                + "        background: #fff;\n"
+                                + "	}\n"
+                                + "	.search-box input::placeholder {\n"
+                                + "        font-style: italic;\n"
+                                + "    }\n"
+                                + "	.search-box .input-group-addon {\n"
+                                + "        min-width: 35px;\n"
+                                + "        border: none;\n"
+                                + "        background: transparent;\n"
+                                + "        position: absolute;\n"
+                                + "        right: 0;\n"
+                                + "        z-index: 9;\n"
+                                + "        padding: 6px 0;\n"
+                                + "    }\n"
+                                + "    .search-box i {\n"
+                                + "        color: #a0a5b1;\n"
+                                + "        font-size: 19px;\n"
+                                + "        position: relative;\n"
+                                + "        top: 2px;\n"
+                                + "    }\n"
+                                + "    table.table {\n"
+                                + "        table-layout: fixed;\n"
+                                + "        margin-top: 15px;\n"
+                                + "    }\n"
+                                + "    table.table tr th, table.table tr td {\n"
+                                + "        border-color: #e9e9e9;\n"
+                                + "    }\n"
+                                + "    table.table th i {\n"
+                                + "        font-size: 13px;\n"
+                                + "        margin: 0 5px;\n"
+                                + "        cursor: pointer;\n"
+                                + "    }\n"
+                                + "    table.table th:first-child {\n"
+                                + "        width: 60px;\n"
+                                + "    }\n"
+                                + "    table.table th:last-child {\n"
+                                + "        width: 120px;\n"
+                                + "    }\n"
+                                + "    table.table td a {\n"
+                                + "        color: #a0a5b1;\n"
+                                + "        display: inline-block;\n"
+                                + "        margin: 0 5px;\n"
+                                + "    }\n"
+                                + "	table.table td a.view {\n"
+                                + "        color: #03A9F4;\n"
+                                + "    }\n"
+                                + "    table.table td a.edit {\n"
+                                + "        color: #FFC107;\n"
+                                + "    }\n"
+                                + "    table.table td a.delete {\n"
+                                + "        color: #E34724;\n"
+                                + "    }\n"
+                                + "    table.table td i {\n"
+                                + "        font-size: 19px;\n"
+                                + "    }    "
                                 + "/*-------------------------------*/\n"
                                 + "/*          Dark Overlay         */\n"
                                 + "/*-------------------------------*/\n"
@@ -557,7 +487,28 @@ public class _home_admin extends HttpServlet {
                                 + "body a:hover {\n"
                                 + "  color: #fff;\n"
                                 + "}\n"
-                                + "</style>\n"
+                                + "</style>"
+                                + "<script type=\"text/javascript\">\n"
+                                + "$(document).ready(function(){\n"
+                                + "	// Activate tooltips\n"
+                                + "	$('[data-toggle=\"tooltip\"]').tooltip();\n"
+                                + "    \n"
+                                + "	// Filter table rows based on searched term\n"
+                                + "    $(\"#search\").on(\"keyup\", function() {\n"
+                                + "        var term = $(this).val().toLowerCase();\n"
+                                + "        $(\"table tbody tr\").each(function(){\n"
+                                + "            $row = $(this);\n"
+                                + "            var name = $row.find(\"td:nth-child(3)\").text().toLowerCase();\n"
+                                + "            console.log(name);\n"
+                                + "            if(name.search(term) < 0){                \n"
+                                + "                $row.hide();\n"
+                                + "            } else{\n"
+                                + "                $row.show();\n"
+                                + "            }\n"
+                                + "        });\n"
+                                + "    });\n"
+                                + "});\n"
+                                + "</script>"
                                 + "\n"
                                 + "</head>\n"
                                 + "<body>\n"
@@ -574,11 +525,11 @@ public class _home_admin extends HttpServlet {
                                 + "                    </a>\n"
                                 + "                </li>\n"
                                 + "                <li>\n"
-                                + "                    <a href=\"#\"><i class=\"fa fa-fw fa-home\"></i> Home</a>\n"
+                                + "                    <a href=\"./_home_admin\"><i class=\"fa fa-fw fa-home\"></i> Home</a>\n"
                                 + "                </li>\n"
                                 + "                <li>\n"
                                 + "                    <a href=\"./view_urusanProduk\"><i class=\"fa fa-fw fa-sitemap\"></i>Manajemen Barang</a>\n"
-                                + "                </li>\n"
+                                + "                </li>\n\n"
                                 + "                <li class=\"dropdown\">\n"
                                 + "                  <a href=\"#\" data-toggle=\"dropdown\"><i class=\"fa fa-fw fa-truck\"></i>Jasa Pengirim<span class=\"caret\"></span></a>\n"
                                 + "                  <ul class=\"dropdown-menu\" role=\"menu\">\n"
@@ -593,7 +544,7 @@ public class _home_admin extends HttpServlet {
                                 + "                  <ul class=\"dropdown-menu\" role=\"menu\">\n"
                                 + "                    <li class=\"dropdown-header\"> </li>\n"
                                 + "                    <li><a href=\"./_urusanToko\">Tambah Toko</a></li>\n"
-                                + "                    <li><a href=\"./view_urusanToko\">Daftar Toko yang Tersedia</a></li>\n"
+                                + "                            <li><a href=\"./view_urusanToko\">Daftar Toko yang Tersedia</a></li>\n"
                                 + "                  </ul>\n"
                                 + "                </li>\n"
                                 + "                \n"
@@ -617,7 +568,6 @@ public class _home_admin extends HttpServlet {
                                 + "        <!-- /#sidebar-wrapper -->\n"
                                 + "\n"
                                 + "        <!-- Page Content -->\n"
-                                + "        <marquee><h2>Selamat datang, " + nama_user + "</h2></marquee>\n"
                                 + "        <div id=\"page-content-wrapper\">\n"
                                 + "          <button type=\"button\" class=\"hamburger is-closed animated fadeInLeft\" data-toggle=\"offcanvas\">\n"
                                 + "            <span class=\"hamb-top\"></span>\n"
@@ -627,46 +577,52 @@ public class _home_admin extends HttpServlet {
                                 + "            \n"
                                 + "            <div class=\"container\">\n"
                                 + "                \n"
-                                + "                <!--<p>isi konten bisa disini</p>-->\n"
+                                + "                "
                                 + "                <div class=\"row\">\n"
-                                + "                    <div class=\"panel panel-container\">\n"
-                                + "			<div class=\"row\">\n"
-                                + "				<div class=\"col-xs-6 col-md-3 col-lg-3 no-padding\">\n"
-                                + "					<div class=\"panel panel-teal panel-widget border-right\">\n"
-                                + "						<div class=\"row no-padding\"><em class=\"fa fa-credit-card\"></em>\n"
-                                + "							<div class=\"large\">" + jumlah_metodebayar + "</div>\n"
-                                + "							<div class=\"text-muted\">Metode Bayar Tersedia</div>\n"
-                                + "						</div>\n"
+                                + "                    <h2>Daftar Produk Tersedia Online</h2>\n"
+                                + "                    <div class=\"table-wrapper\"><!--MULAI TABEL-->			\n"
+                                + "            <div class=\"table-title\">\n"
+                                + "                <div class=\"row\">\n"
+                                + "					<div class=\"col-sm-6\">\n"
+                                + "						<i class=\"material-icons\">category</i>\n"
                                 + "					</div>\n"
-                                + "				</div>\n"
-                                + "				<div class=\"col-xs-6 col-md-3 col-lg-3 no-padding\">\n"
-                                + "					<div class=\"panel panel-blue panel-widget border-right\">\n"
-                                + "						<div class=\"row no-padding\"><em class=\"fa fa-th-large\"></em>\n"
-                                + "							<div class=\"large\">" + jumlah_toko + "</div>\n"
-                                + "							<div class=\"text-muted\">Toko Kerajinan Lokal</div>\n"
-                                + "						</div>\n"
-                                + "					</div>\n"
-                                + "				</div>\n"
-                                + "				<div class=\"col-xs-6 col-md-3 col-lg-3 no-padding\">\n"
-                                + "					<div class=\"panel panel-orange panel-widget border-right\">\n"
-                                + "						<div class=\"row no-padding\"><em class=\"fa fa-xl fa-users\"></em>\n"
-                                + "							<div class=\"large\">" + jumlah_user + "</div>\n"
-                                + "							<div class=\"text-muted\">Customer Terdaftar</div>\n"
-                                + "						</div>\n"
-                                + "					</div>\n"
-                                + "				</div>\n"
-                                + "				<div class=\"col-xs-6 col-md-3 col-lg-3 no-padding\">\n"
-                                + "					<div class=\"panel panel-red panel-widget \">\n"
-                                + "						<div class=\"row no-padding\"><em class=\"fa fa-xl fa-sitemap\"></em>\n"
-                                + "							<div class=\"large\">" + jumlah_barangOnline + "</div>\n"
-                                + "							<div class=\"text-muted\">Produk Tersedia Online</div>\n"
-                                + "						</div>\n"
-                                + "					</div>\n"
-                                + "				</div>\n"
-                                + "			</div><!--/.row-->\n"
-                                + "		</div>"
-                                + "                    <div class=\"col-lg-8 col-lg-offset-2\">\n"
-                                + "                        <p>isi konten bisa disini3</p>\n"
+                                + "                    <div class=\"col-sm-6\">\n"
+                                + "                        <div class=\"search-box\">\n"
+                                + "							<div class=\"input-group\">								\n"
+                                + "								<input type=\"text\" id=\"search\" class=\"form-control\" placeholder=\"Search by Name\">\n"
+                                + "                                <span class=\"input-group-addon\"><i class=\"material-icons\">&#xE8B6;</i></span>\n"
+                                + "							</div>\n"
+                                + "                        </div>\n"
+                                + "                    </div>\n"
+                                + "                </div>\n"
+                                + "            </div>"
+                                + "          <table class=\"table table-striped\">"
+                                + "                <thead>\n"
+                                + "                    <tr>\n"
+                                + "                        <th>#</th>\n"
+                                + "                        <th style=\"width: 10%;\">ID Produk</th>\n"
+                                + "                        <th style=\"width: 22%;\">Nama Nama Produk</th>\n"
+                                + "                        <th style=\"width: 22%;\">Jenis Produk</th>\n"
+                                + "                        <th style=\"width: 22%;\">Foto Produk</th>\n"
+                                + "                        <th>Opsi</th>\n"
+                                + "                    </tr>\n"
+                                + "                </thead>"
+                                + "         <tbody>");
+                        for (int i = 0; i < produk.size(); i++) {
+                            urutan = urutan + 1;
+                            out.println("<tr>"
+                                    + "<td>" + urutan + "</td>"
+                                    + "<td>" + produk.get(i).getId_produk() + "</td>"
+                                    + "<td>" + produk.get(i).getNama_produk() + "</td>"
+                                    + "<td>" + produk.get(i).getJenis_produk() + "</td>"
+                                    + "<td><img src=\"./productImage_loader?idProduk_=" + produk.get(i).getId_produk() + "\" width=\"90\" height=\"50\"/></td>"
+                                    + "<td>\n"
+                                    + "    <a href=\"./confirmhapusdata_urusanProduk?idProduk_=" + produk.get(i).getId_produk() + "\" class=\"delete\" title=\"Delete\" data-toggle=\"tooltip\"><i class=\"material-icons\">&#xE872;</i></a>\n"
+                                    + "</td>"
+                                    + "</tr>");
+                        }
+                        out.println("</table>\n"
+                                + "        </div><!--AKHIR TABEL-->"
                                 + "                    </div>\n"
                                 + "                </div>\n"
                                 + "            </div>\n"
@@ -715,7 +671,7 @@ public class _home_admin extends HttpServlet {
                         out.close();
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(_home_admin.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(view_urusanPengiriman.class.getName()).log(Level.SEVERE, null, ex);
                     String pesan_error = ex.getMessage();
                     out.println("<!DOCTYPE html>\n"
                             + "<html lang=\"en\" >\n"
@@ -1019,6 +975,7 @@ public class _home_admin extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
     }
 
     /**

@@ -355,7 +355,7 @@ public class seller_viewProducts extends HttpServlet {
                                 + "                <li><a href=\"./seller_urusanProduk\"><i class=\"fa fa-sitemap\"></i><span>Manajemen Barang</span></a></li>\n"
                                 + "                <li><a href=\"./seller_urusanPengiriman\"><i class=\"fa fa-truck\"></i><span>Manajemen Pengiriman</span></a></li>\n"
                                 + "                <li><a href=\"./seller_kotakMasuk\"><i class=\"fa fa-envelope\"></i><span>Inbox</span></a></li>\n"
-                                + "                <li><a href=\"./seller_accountSetting\"><i class=\"fa fa-wrench\"></i><span>Pengaturan Akun</span></a></li>\n"
+                                + "                <li><a href=\"./seller_accountSetting?idToko_="+idAkun+"\"><i class=\"fa fa-wrench\"></i><span>Pengaturan Akun</span></a></li>\n"
                                 + "                <li><a href=\"./logout2_\"><i class=\"fa fa-power-off\"></i><span>Logout</span></a></li>\n"
                                 + "            </ul> \n"
                                 + "        </div>\n"

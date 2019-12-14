@@ -3,26 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package homenya_admin;
+package homenya_penjual;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
 import kelas_java.OBJ_toko;
 import kelas_java.db_connection;
 
@@ -30,13 +23,8 @@ import kelas_java.db_connection;
  *
  * @author ASUS
  */
-@MultipartConfig(location = "/.", fileSizeThreshold = 1024 * 1024,
-        maxFileSize = 1024 * 1024 * 5, maxRequestSize = 1024 * 1024 * 5 * 5)
-@WebServlet(name = "simpan_urusanToko", urlPatterns = {"/simpan_urusanToko"})
-public class simpan_urusanToko extends HttpServlet {
-
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-    Date date = new Date();
+@WebServlet(name = "seller_saveAccountSetting", urlPatterns = {"/seller_saveAccountSetting"})
+public class seller_saveAccountSetting extends HttpServlet {
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -63,67 +51,41 @@ public class simpan_urusanToko extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String idAdmin = null;
-        String tanggal_daftar = formatter.format(date);
-
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("idAkun")) {
-                idAdmin = cookie.getValue();
-            }
-        }
-
-        InputStream inputStream;
-        Part filePart;
-        filePart = request.getPart("logo_store");
-        inputStream = filePart.getInputStream();
         PrintWriter out = response.getWriter();
-        Random rnd = new Random();
-        int number = rnd.nextInt(999999);
-
-        String id_tokoSTR = String.format("%06d", number);
-        int idnyaToko = Integer.parseInt(id_tokoSTR);
-
-        try {
+        
+        OBJ_toko toko_ = new OBJ_toko();
+        int idToko_STR2INT = Integer.parseInt(request.getParameter("seller_id"));
+        toko_.setId_toko(idToko_STR2INT);
+        toko_.setNama_toko(request.getParameter("namaToko"));
+        toko_.setAlamat_toko(request.getParameter("alamatToko"));
+        toko_.setUsername_toko(request.getParameter("emailToko"));
+        toko_.setKontak_toko(request.getParameter("notelToko"));
+        toko_.setPassword_toko(request.getParameter("passwordToko"));
+        try{
             Class.forName("com.mysql.jdbc.Driver");
             Connection conn = db_connection.connect_to_Db();
-            int idAdmin_int = Integer.parseInt(idAdmin);
-
-            OBJ_toko toko_baru = new OBJ_toko();
-            toko_baru.setId_toko(idnyaToko);
-            toko_baru.setNama_toko(request.getParameter("nama_toko"));
-            toko_baru.setKontak_toko(request.getParameter("notel_toko"));
-            toko_baru.setAlamat_toko(request.getParameter("alamat_toko"));
-            toko_baru.setUsername_toko(request.getParameter("email_toko"));
-            toko_baru.setPassword_toko(request.getParameter("password_toko"));
-            toko_baru.setKontak_toko(request.getParameter("notel_toko"));
             
-            PreparedStatement PSaddtoko = conn.prepareStatement("INSERT INTO tabel_toko VALUES (?,?,?,?,?,?,?,?,?,?,?)");
-            PSaddtoko.setInt(1, toko_baru.getId_toko());
-            PSaddtoko.setString(2, toko_baru.getNama_toko());
-            PSaddtoko.setString(3, toko_baru.getAlamat_toko());
-            PSaddtoko.setString(4, toko_baru.getKontak_toko());
-            PSaddtoko.setString(5, toko_baru.getUsername_toko());
-            PSaddtoko.setString(6, toko_baru.getPassword_toko());
-            PSaddtoko.setInt(7, idAdmin_int);
-            PSaddtoko.setInt(8, toko_baru.getId_toko());
-            PSaddtoko.setString(9, tanggal_daftar);
-            PSaddtoko.setBlob(10, inputStream);
-            PSaddtoko.setString(11, "seller");
-            PSaddtoko.executeUpdate();
+            PreparedStatement prpEdit = conn.prepareStatement("UPDATE tabel_toko SET nama_toko=?, alamat_toko=?, notel_toko=?, email_toko=?, password_toko=? WHERE id_toko=?");
+            prpEdit.setString(1, toko_.getNama_toko());
+            prpEdit.setString(2, toko_.getAlamat_toko());
+            prpEdit.setString(3, toko_.getKontak_toko());
+            prpEdit.setString(4, toko_.getUsername_toko());
+            prpEdit.setString(5, toko_.getPassword_toko());
+            prpEdit.setInt(6, toko_.getId_toko());
+            prpEdit.executeUpdate();
             conn.close();
-
+            
             try {
                 out.println("<script type=\"text/javascript\">");
-                out.println("alert('Berhasil menambahkan toko');");
-                out.println("location='./_home_admin';");
+                out.println("alert('Perubahan berhasil disimpan!');");
+                out.println("location='./_home_seller';");
                 out.println("</script>");
             } finally {
                 out.close();
             }
-
-        } catch (Exception ex) {
-            Logger.getLogger(simpan_urusanPengiriman.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch(Exception ex){
+            Logger.getLogger(seller_saveAccountSetting.class.getName()).log(Level.SEVERE, null, ex);
             String pesan_error = ex.getMessage();
             out.println("<!DOCTYPE html>\n"
                     + "<html lang=\"en\" >\n"
@@ -395,7 +357,7 @@ public class simpan_urusanToko extends HttpServlet {
                     + "  <div id=\"box\"></div>\n"
                     + "  <h3>ERROR 500</h3>\n"
                     + "  <p>Inter<span>nal Serv</span>er <span>Err0r*=@#!</span>234Z_</p>\n"
-                    + "  <p>" + pesan_error + "</p>\n"
+                    + "  <p>"+pesan_error+"</p>\n"
                     + "</div>\n"
                     + "<!-- partial -->\n"
                     + "  \n"

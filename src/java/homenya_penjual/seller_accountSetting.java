@@ -71,6 +71,7 @@ public class seller_accountSetting extends HttpServlet {
                         toko_.setAlamat_toko(rs.getString("alamat_toko"));
                         toko_.setUsername_toko(rs.getString("email_toko"));
                         toko_.setPassword_toko(rs.getString("password_toko"));
+                        toko_.setKontak_toko(rs.getString("notel_toko"));
                         tanggal_daftar = rs.getString("registration_date");
                         didaftarkan_oleh = rs.getString("registred_by_admin");
                         regis_id = rs.getString("registration_id");
@@ -379,6 +380,10 @@ public class seller_accountSetting extends HttpServlet {
                                 + "                                        <div class=\"form-group\">\n"
                                 + "                                            <label>Nama Toko</label>\n"
                                 + "                                            <input name=\"namaToko\"type=\"text\" class=\"form-control\" id=\"exampleInputEmail1\" required placeholder=\"cth : kaus kaki motif nazi\" value=\"" + toko_.getNama_toko() + "\">\n"
+                                + "                                        </div>\n"
+                                + "                                        <div class=\"form-group\">\n"
+                                + "                                            <label>No Telepon Toko</label>\n"
+                                + "                                            <input name=\"notelToko\"type=\"text\" class=\"form-control\" id=\"exampleInputEmail1\" required placeholder=\"+62\" value=\"" + toko_.getKontak_toko()+ "\">\n"
                                 + "                                        </div>\n"
                                 + "                                        <div class=\"form-group\">\n"
                                 + "                                            <label >Alamat Toko</label>\n"

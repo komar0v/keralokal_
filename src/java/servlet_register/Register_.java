@@ -77,7 +77,7 @@ public class Register_ extends HttpServlet {
             pengguna.setNohp_customer(request.getParameter("noHp_"));
             pengguna.setAlamat_customer(request.getParameter("alamat_"));
 
-            PreparedStatement ps = conn.prepareStatement("INSERT INTO tabel_customer VALUES (?,?,?,?,?,?,?,?,?,?)");
+            PreparedStatement ps = conn.prepareStatement("INSERT INTO tabel_customer VALUES (?,?,?,?,?,?,?,?,?,?,?)");
             ps.setString(1, pengguna.getId_customer());
             ps.setString(2, pengguna.getEmail_customer());
             ps.setString(3, pengguna.getPassword_customer());
@@ -88,6 +88,7 @@ public class Register_ extends HttpServlet {
             ps.setString(8, pengguna.getAlamat_customer());
             ps.setBlob(9, inputStream);
             ps.setBlob(10, inputStream);
+            ps.setString(11, "user");
             ps.executeUpdate();
             conn.close();
 

@@ -58,7 +58,7 @@ public class detail_produk extends HttpServlet {
             if (levelAkun.equals("user")) {
                 try {
 
-                    String idToko=null;
+                    String idToko = null;
                     Class.forName("com.mysql.jdbc.Driver");
                     Connection conn = db_connection.connect_to_Db();
 
@@ -67,7 +67,7 @@ public class detail_produk extends HttpServlet {
                     ResultSet rs = ps.executeQuery();
                     OBJ_produk dftr_produk = new OBJ_produk();
 
-                    String tgl_masuk=null;
+                    String tgl_masuk = null;
                     int stok = 0;
                     while (rs.next()) {
                         stok = rs.getInt("stok_produk");
@@ -80,14 +80,14 @@ public class detail_produk extends HttpServlet {
                         dftr_produk.setHarga_produk(rs.getDouble("harga_produk"));
                         idToko = rs.getString("inserted_by");
                     }
-                    
+
                     PreparedStatement ps2 = conn.prepareStatement("SELECT nama_toko FROM tabel_toko WHERE id_toko=?");
                     ps2.setString(1, idToko);
                     ResultSet rs2 = ps2.executeQuery();
-                    String nama_tokonya=null;
-                    
-                    while(rs2.next()){
-                        nama_tokonya=rs2.getString("nama_toko");
+                    String nama_tokonya = null;
+
+                    while (rs2.next()) {
+                        nama_tokonya = rs2.getString("nama_toko");
                     }
 
                     try {
@@ -170,7 +170,7 @@ public class detail_produk extends HttpServlet {
                                 + "                    <div class=\"inner\">\n"
                                 + "\n"
                                 + "                        <!-- Logo -->\n"
-                                + "                        <a href=\"index.html\" class=\"logo\">\n"
+                                + "                        <a href=\"./_home_cust\" class=\"logo\">\n"
                                 + "                            <span class=\"symbol\"><img src=\"images/logo.png\" alt=\"\" /></span><span class=\"title\">Kera          Lokal</span>\n"
                                 + "                        </a>\n"
                                 + "\n"
@@ -188,8 +188,9 @@ public class detail_produk extends HttpServlet {
                                 + "                <nav id=\"menu\">\n"
                                 + "                    <h2>Menu</h2>\n"
                                 + "                    <ul>\n"
-                                + "                        <li><a href=\"index.html\">Home</a></li>\n"
-                                + "                        <li><a href=\"./halaman_login\">Login/Daftar</a></li>\n"
+                                + "                        <li><a href=\"./_home_cust\">Home</a></li>\n"
+                                + "                        <li><a href=\"./keranjang_belanja\">Keranjang</a></li>\n"
+                                + "                        <li><a href=\"./logout2_\">Logout</a></li>\n"
                                 + "                    </ul>\n"
                                 + "                </nav>\n"
                                 + "\n"
@@ -197,7 +198,7 @@ public class detail_produk extends HttpServlet {
                                 + "                <div id=\"main\">\n"
                                 + "                    <div class=\"inner\">\n"
                                 + "\n                   <div class=\"jumbotron\">\n"
-                                + "                             <p>Produk oleh <a href=\"./lihat_toko?idToko_="+idToko+"\">"+nama_tokonya+"</a> ditambahkan pada "+tgl_masuk+"</p>\n"
+                                + "                             <p>Produk oleh <a href=\"./lihat_toko?idToko_=" + idToko + "\">" + nama_tokonya + "</a> ditambahkan pada " + tgl_masuk + "</p>\n"
                                 + "                     </div>"
                                 + "                        <main class=\"container\">\n"
                                 + "\n"
@@ -213,15 +214,13 @@ public class detail_produk extends HttpServlet {
                                 + "                                <div class=\"product-description\">\n"
                                 + "                                    <h1>" + dftr_produk.getNama_produk() + "</h1>\n"
                                 + "                                    <p>" + dftr_produk.getKeterangan_produk() + "</p>\n"
-                                + "                                    <h2>Rp. "+dftr_produk.getHarga_produk()+"</h2>"
+                                + "                                    <h2>Rp. " + dftr_produk.getHarga_produk() + "</h2>"
                                 + "                                </div>\n"
                                 + "                                <form>\n"
                                 + "                                    <div>\n"
-                                + "                                        <h4> Stok : " + stok + "</h4><div class=\"qty-input\"><i class=\"less\">-</i>\n"
-                                + "                                            <input type=\"text\" value=\"1\"/><i class=\"more\">+</i>\n"
-                                + "                                        </div>\n"
+                                + "                                        <h4> Stok : " + stok + "</h4>"
                                 + "                                        <ul class=\"actions\">\n"
-                                + "                                            <li><a href=\"#\" class=\"button primary\">Masukkan ke Keranjang</a></li>\n"
+                                + "                                            <a onclick=\"masukkekeranjang()\" href=\"#\" data-name=\"" + dftr_produk.getNama_produk() + "\" data-price=\"" + dftr_produk.getHarga_produk() + "\" class=\"button primary add-to-cart btn btn-primary\">Masukkan ke Keranjang</a>"
                                 + "                                        </ul>\n"
                                 + "                                    </div>\n"
                                 + "                                </form>\n"
@@ -248,6 +247,12 @@ public class detail_produk extends HttpServlet {
                                 + "            <script src=\"assets/js/breakpoints.min.js\"></script>\n"
                                 + "            <script src=\"assets/js/util.js\"></script>\n"
                                 + "            <script src=\"assets/js/main.js\"></script>\n"
+                                + "            <script src=\"assets/js/script_keranjang.js\"></script>"
+                                + "            <script>\n"
+                                + "                 function masukkekeranjang() {\n"
+                                + "                 alert(\"Berhasil menambahkan item\");\n"
+                                + "                                       }\n"
+                                + "            </script>"
                                 + "        </body>\n"
                                 + "    </html>");
                     } finally {

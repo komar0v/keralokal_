@@ -160,13 +160,13 @@ function displayCart() {
   var output = "";
   for(var i in cartArray) {
     output += "<tr>"
-      + "<td>" + cartArray[i].name + "</td>" 
+      + "<td> <input type='hidden' name='fieldNamaBarang' id='fieldNamaBarang' value='"+cartArray[i].name+"' />" + cartArray[i].name + "</td>" 
       + "<td>(Rp. " + cartArray[i].price + ")</td>"
       + "<td><div class='input-group'>"
-      + "<input type='number' min='1' class='item-count form-control' data-name='" + cartArray[i].name + "' value='" + cartArray[i].count + "'>"
+      + "<input type='number' min='1' name='fieldBanyakBarang' id='fieldBanyakBarang' class='item-count form-control' data-name='" + cartArray[i].name + "' value='" + cartArray[i].count + "'>"
       + "</div></td>"
       + " = " 
-      + "<td> Rp. " + cartArray[i].total + "</td>" 
+      + "<td> Rp. " + cartArray[i].total + "</td> <input type='hidden' name='hargaTotal' id='hargaTotal' value='"+cartArray[i].total+"' />" 
       +  "</tr>";
   }
   $('.show-cart').html(output);

@@ -7,6 +7,11 @@ package homenya_customer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -15,29 +20,59 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import kelas_java.OBJ_metodepembayaran;
+import kelas_java.db_connection;
 
 /**
  *
  * @author ASUS
  */
-@WebServlet(name = "keranjang_belanja", urlPatterns = {"/keranjang_belanja"})
-public class keranjang_belanja extends HttpServlet {
+@WebServlet(name = "proses_pesanan", urlPatterns = {"/proses_pesanan"})
+public class proses_pesanan extends HttpServlet {
 
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
+     * Handles the HTTP <code>GET</code> method.
      *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
+
+    }
+
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         PrintWriter out = response.getWriter();
+        String bnykBarang[] = request.getParameterValues("fieldBanyakBarang");
+        String namaBarang[] = request.getParameterValues("fieldNamaBarang");
+        String totalHarga = request.getParameter("hargaTotal");
+        System.out.println(totalHarga);
+
+        Random rnd = new Random();
+        String SALTCHARS = "ABCDEFGHIJKL1234567890MNOPQRSTUVWXYZ";
+        StringBuilder salt = new StringBuilder();
+        while (salt.length() < 18) {
+            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
+            salt.append(SALTCHARS.charAt(index));
+        }
+        String kode_unik = salt.toString();
+
         String nama_user = null;
-        String sessionID = null;
+        String idAkun = null;
         String levelAkun = null;
 
         Cookie[] cookies = request.getCookies();
@@ -46,16 +81,31 @@ public class keranjang_belanja extends HttpServlet {
                 if (cookie.getName().equals("namaUser")) {
                     nama_user = cookie.getValue();
                 }
-                if (cookie.getName().equals("JSESSIONID")) {
-                    sessionID = cookie.getValue();
-                }
                 if (cookie.getName().equals("levelAkun")) {
                     levelAkun = cookie.getValue();
+                }
+                if (cookie.getName().equals("idAkun")) {
+                    idAkun = cookie.getValue();
                 }
             }
             if (levelAkun.equals("user")) {
                 try {
+                    Class.forName("com.mysql.jdbc.Driver");
+                    Connection conn = db_connection.connect_to_Db();
 
+                    PreparedStatement ps = conn.prepareStatement("SELECT id_pymntmthd, nama_pymntmthd FROM tabel_metodebayar");
+                    ResultSet rs = ps.executeQuery();
+
+                    ArrayList<OBJ_metodepembayaran> payment = new ArrayList<OBJ_metodepembayaran>();
+                    int urutan = 0;
+                    while (rs.next()) {
+
+                        OBJ_metodepembayaran payment_list = new OBJ_metodepembayaran();
+                        payment_list.setId_paymentMethod(rs.getInt("id_pymntmthd"));
+                        payment_list.setNama_paymentMethod(rs.getString("nama_pymntmthd"));
+
+                        payment.add(payment_list);
+                    }
                     try {
                         out.println("<!DOCTYPE HTML>\n"
                                 + "<html>\n"
@@ -106,24 +156,47 @@ public class keranjang_belanja extends HttpServlet {
                                 + "								<h1>Keranjang belanja " + nama_user + "</h1>\n"
                                 + "								<p>Yuk proses orderan kamu biar segera dikirim ke alamat rumahmu.</p>\n"
                                 + "							</header><hr>\n"
-                                + "<div class=\"modal-content\">\n"
-                                + "      <div class=\"modal-header\">\n"
-                                + "        <h5 class=\"modal-title\" id=\"exampleModalLabel\"></h5>\n"
-                                + "      </div>\n"
-                                + "     <form method=\"POST\" action=\"./proses_pesanan\">"
-                                + "      <div class=\"modal-body\">\n"
-                                + "        <table class=\"show-cart table\">\n"
-                                + "          \n"
-                                + "        </table><hr>\n"
-                                + "        <div><h4>Harga Total: Rp. <span class=\"total-cart\"></span></h4></div>\n"
-                                + "      </div>\n"
-                                + "      <div class=\"modal-footer\">\n"
-                                + "         <button type=\"submit\" class=\"btn btn-primary\">Pesan Sekarang!</button>\n"
-                                + "      </div>\n"
-                                + "     </form>"
-                                        + "<button class=\"clear-cart btn btn-danger\">Kosongkan Keranjang</button></div>"
-                                + "    </div>"
-                                + "						</div>\n"
+                                + "                                     <div class=\"table-wrapper\">"
+                                + "                                     <table>"
+                                + "                                    <thead>\n"
+                                + "					<tr>\n"
+                                + "					<th>Nama Item</th>\n"
+                                + "					<th>Banyaknya</th>\n"
+                                + "					</tr>\n"
+                                + "					</thead>"
+                                + "                                     <tbody>");
+
+                        for (int i = 0; i < namaBarang.length; i++) {
+                            out.println("<tr><td>" + namaBarang[i] + "</td><td> " + bnykBarang[i] + "</td></tr>");
+                        }
+
+                        out.println("                                    </tbody><tfoot>\n"
+                                + "						<tr>\n"
+                                + "						<td colspan=\"2\"></td>\n"
+                                + "						<td><h3>TOTAL : Rp. <span class=\"total-cart\"></span></h3></td>\n"
+                                + "						</tr>\n"
+                                + "						</tfoot>"
+                                + "                                      </table>"
+                                + "</div>"
+                                + "<center><h2>METODE PEMBAYARAN</h2><form method=\"POST\" action=\"./proses_pesanan2\">"
+                                + "             <ul class=\"alt\">\n");
+                        int urutanPayment = 0;
+                        for (int i = 0; i < payment.size(); i++) {
+                            urutanPayment = urutanPayment + 1;
+                            out.println("<li>"
+                                    + "      <div class=\"col-4 col-12-small\">\n"
+                                    + "         <input type=\"radio\" id=\"pay_" + urutanPayment + "\" name=\"paymentSelect\" value=\"" + payment.get(i).getNama_paymentMethod() + "\">\n"
+                                    + "		<label for=\"pay_" + urutanPayment + "\"><img src=\"./paymentLogo_loader?idMetodeBayar_=" + payment.get(i).getId_paymentMethod() + "\" width=\"220\" height=\"130\"/></label>\n"
+                                    + "      </div>"
+                                    + "</li>\n");
+                        }
+                        out.println("             </ul>"
+                                + "     <input type=\"hidden\" name=\"idnyaUser\" value=\"" + idAkun + "\" />\n"
+                                + "     <input type=\"hidden\" name=\"atas_nama\" value=\"" + nama_user + "\" />\n"
+                                + "     <input type=\"hidden\" name=\"besarnya_transaksi\" value=\"" + totalHarga + "\" \n/>"
+                                + "     <input type=\"hidden\" name=\"kodeUnik\" value=\"" + kode_unik + "\" \n/>"
+                                + "     <button class=\"button icon solid\" type=\"submit\">BAYAR</button>\n"
+                                + "						</form></center></div>\n"
                                 + "					</div>\n"
                                 + "\n"
                                 + "				<!-- Footer -->\n"
@@ -442,36 +515,6 @@ public class keranjang_belanja extends HttpServlet {
         } else {
             response.sendRedirect("./index.html");
         }
-
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
-
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
     }
 
     /**

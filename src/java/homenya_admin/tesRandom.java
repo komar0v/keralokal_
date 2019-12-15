@@ -18,5 +18,14 @@ public class tesRandom {
         int number = rnd.nextInt(999999);
 
         System.out.println(String.format("%06d", number));
+        
+        String SALTCHARS = "ABCDEFGHIJKL1234567890MNOPQRSTUVWXYZ";
+        StringBuilder salt = new StringBuilder();
+        while (salt.length() < 18) {
+            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
+            salt.append(SALTCHARS.charAt(index));
+        }
+        String saltStr = salt.toString();
+        System.out.println(saltStr);
     }
 }

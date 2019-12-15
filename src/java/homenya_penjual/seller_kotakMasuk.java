@@ -60,7 +60,7 @@ public class seller_kotakMasuk extends HttpServlet {
                     Class.forName("com.mysql.jdbc.Driver");
                     Connection conn = db_connection.connect_to_Db();
 
-                    PreparedStatement ps = conn.prepareStatement("SELECT * FROM tabel_kotak_masuk WHERE request_ke=?");
+                    PreparedStatement ps = conn.prepareStatement("SELECT * FROM tabel_kotak_masuk WHERE request_ke=? AND status_request = 'barumasuk' ");
                     ps.setString(1, idAkun);
 
                     ResultSet rs = ps.executeQuery();
@@ -465,8 +465,8 @@ public class seller_kotakMasuk extends HttpServlet {
                                 + "                <div class=\"panel-body\">\n"
                                 + "                    <ul class=\"nav nav-tabs\">\n"
                                 + "                        <li class=\"active\"><a href=\"#\" data-toggle=\"tab\">Request Produk Masuk</a></li>\n"
-                                + "                        <li class=\"\"><a href=\"#\" data-toggle=\"tab\">Diterima</a>\n"
-                                + "                        <li class=\"\"><a href=\"#\" data-toggle=\"tab\">Ditolak</a>\n"
+                                + "                        <li class=\"\"><a href=\"./seller_kotakMasuk_diterima\" data-toggle=\"tab\">Diterima</a>\n"
+                                + "                        <li class=\"\"><a href=\"./seller_kotakMasuk_ditolak\" data-toggle=\"tab\">Ditolak</a>\n"
                                 + "                        </li>\n"
                                 + "                    </ul>\n"
                                 + "\n"

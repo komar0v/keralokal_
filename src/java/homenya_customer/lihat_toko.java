@@ -20,14 +20,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import kelas_java.OBJ_produk;
+import kelas_java.OBJ_toko;
 import kelas_java.db_connection;
 
 /**
  *
  * @author ASUS
  */
-@WebServlet(name = "detail_produk", urlPatterns = {"/detail_produk"})
-public class detail_produk extends HttpServlet {
+@WebServlet(name = "lihat_toko", urlPatterns = {"/lihat_toko"})
+public class lihat_toko extends HttpServlet {
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -43,6 +44,7 @@ public class detail_produk extends HttpServlet {
             throws ServletException, IOException {
         PrintWriter out = response.getWriter();
         String nama_user = null;
+        String sessionID = null;
         String levelAkun = null;
 
         Cookie[] cookies = request.getCookies();
@@ -51,210 +53,146 @@ public class detail_produk extends HttpServlet {
                 if (cookie.getName().equals("namaUser")) {
                     nama_user = cookie.getValue();
                 }
+                if (cookie.getName().equals("JSESSIONID")) {
+                    sessionID = cookie.getValue();
+                }
                 if (cookie.getName().equals("levelAkun")) {
                     levelAkun = cookie.getValue();
                 }
             }
             if (levelAkun.equals("user")) {
                 try {
-
-                    String idToko=null;
                     Class.forName("com.mysql.jdbc.Driver");
                     Connection conn = db_connection.connect_to_Db();
-
-                    PreparedStatement ps = conn.prepareStatement("SELECT nama_produk, keterangan_produk, inserted_date, stok_produk, harga_produk, jenis_produk, inserted_by FROM tabel_produk WHERE product_id=?");
-                    ps.setString(1, request.getParameter("idProduk_"));
+                    String idToko = request.getParameter("idToko_");
+                    
+                    PreparedStatement ps = conn.prepareStatement("SELECT product_id, nama_produk, jenis_produk, harga_produk FROM tabel_produk WHERE inserted_by=?");
+                    ps.setString(1, idToko);
                     ResultSet rs = ps.executeQuery();
-                    OBJ_produk dftr_produk = new OBJ_produk();
 
-                    String tgl_masuk=null;
-                    int stok = 0;
+                    ArrayList<OBJ_produk> products = new ArrayList<OBJ_produk>();
                     while (rs.next()) {
-                        stok = rs.getInt("stok_produk");
-                        tgl_masuk = rs.getString("inserted_date");
-
-                        dftr_produk.setId_produk(request.getParameter("idProduk_"));
+                        int prodId_int = rs.getInt("product_id");
+                        String prodId_str = Integer.toString(prodId_int);
+                        OBJ_produk dftr_produk = new OBJ_produk();
+                        dftr_produk.setId_produk(prodId_str);
                         dftr_produk.setNama_produk(rs.getString("nama_produk"));
-                        dftr_produk.setKeterangan_produk(rs.getString("keterangan_produk"));
                         dftr_produk.setJenis_produk(rs.getString("jenis_produk"));
                         dftr_produk.setHarga_produk(rs.getDouble("harga_produk"));
-                        idToko = rs.getString("inserted_by");
-                    }
-                    
-                    PreparedStatement ps2 = conn.prepareStatement("SELECT nama_toko FROM tabel_toko WHERE id_toko=?");
-                    ps2.setString(1, idToko);
-                    ResultSet rs2 = ps2.executeQuery();
-                    String nama_tokonya=null;
-                    
-                    while(rs2.next()){
-                        nama_tokonya=rs2.getString("nama_toko");
-                    }
 
+                        products.add(dftr_produk);
+                    }
+                    
+                    PreparedStatement psDetailtoko = conn.prepareStatement("SELECT nama_toko, alamat_toko, notel_toko, registration_date FROM tabel_toko WHERE id_toko=?");
+                    psDetailtoko.setString(1, idToko);
+                    ResultSet rs2 = psDetailtoko.executeQuery();
+                    
+                    String tglGabung = null;
+                    OBJ_toko tokonya = new OBJ_toko();
+                    while(rs2.next()){
+                        
+                        tokonya.setNama_toko(rs2.getString("nama_toko"));
+                        tokonya.setAlamat_toko(rs2.getString("alamat_toko"));
+                        tokonya.setKontak_toko(rs2.getString("notel_toko"));
+                        tglGabung = rs2.getString("registration_date");
+                    }
+                    
                     try {
                         out.println("<!DOCTYPE HTML>\n"
                                 + "<html>\n"
-                                + "    <head>\n"
-                                + "        <title>Produk " + dftr_produk.getNama_produk() + "</title>\n"
-                                + "        <meta charset=\"utf-8\" />\n"
-                                + "        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\" />\n"
-                                + "        <link rel=\"stylesheet\" href=\"assets/css/main.css\" />\n"
-                                + "        <noscript><link rel=\"stylesheet\" href=\"assets/css/noscript.css\" /></noscript>\n"
-                                + "        <style type=\"text/css\">\n"
-                                + "            .container {\n"
-                                + "                max-width: 1200px;\n"
-                                + "                margin: 0 auto;\n"
-                                + "                padding: 15px;\n"
-                                + "                display: flex;\n"
-                                + "            }\n"
-                                + "            .right-column {\n"
-                                + "                width: 55%;\n"
-                                + "                margin-top: 60px;\n"
-                                + "            }\n"
-                                + "            .left-column {\n"
-                                + "                width: 65%;\n"
-                                + "                position: relative;\n"
-                                + "            }\n"
-                                + "            .product-description {\n"
-                                + "                border-bottom: 1px solid #E1E8EE;\n"
-                                + "                margin-bottom: 20px;\n"
-                                + "            }\n"
-                                + "            .product-description span {\n"
-                                + "                font-size: 12px;\n"
-                                + "                color: #358ED7;\n"
-                                + "                letter-spacing: 1px;\n"
-                                + "                text-transform: uppercase;\n"
-                                + "                text-decoration: none;\n"
-                                + "            }\n"
+                                + "	<head>\n"
+                                + "		<title>Kera Lokal Home</title>\n"
+                                + "		<meta charset=\"utf-8\" />\n"
+                                + "		<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\" />\n"
+                                + "		<link rel=\"stylesheet\" href=\"assets/css/main.css\" />\n"
+                                + "		<noscript><link rel=\"stylesheet\" href=\"assets/css/noscript.css\" /></noscript>\n"
+                                + "	</head>\n"
+                                + "	<body class=\"is-preload\">\n"
+                                + "		<!-- Wrapper -->\n"
+                                + "			<div id=\"wrapper\">\n"
                                 + "\n"
-                                + "            .qty-input {\n"
-                                + "                border: 1px solid black;\n"
-                                + "                height: 40px;\n"
-                                + "                position: relative;\n"
-                                + "                width: 122px;\n"
-                                + "            }\n"
-                                + "            .qty-input i {\n"
-                                + "                cursor: pointer;\n"
-                                + "                font-family: serif;\n"
-                                + "                height: 40px;\n"
-                                + "                float: left;\n"
-                                + "                line-height: 40px;\n"
-                                + "                text-align: center;\n"
-                                + "                -webkit-user-select: none;\n"
-                                + "                -moz-user-select: none;\n"
-                                + "                -ms-user-select: none;\n"
-                                + "                user-select: none;\n"
-                                + "                transition: all 150ms ease-out;\n"
-                                + "                width: 33px;\n"
-                                + "            }\n"
-                                + "            .qty-input i:active {\n"
-                                + "                background-color: #F1F1F1;\n"
-                                + "                transition: none;\n"
-                                + "            }\n"
-                                + "            .qty-input input {\n"
-                                + "                border: 0px solid;\n"
-                                + "                float: left;\n"
-                                + "                font-size: 24px;\n"
-                                + "                height: 38px;\n"
-                                + "                text-align: center;\n"
-                                + "                outline: none;\n"
-                                + "                width: 54px;\n"
-                                + "            </style>\n"
+                                + "				<!-- Header -->\n"
+                                + "					<header id=\"header\">\n"
+                                + "						<div class=\"inner\">\n"
                                 + "\n"
-                                + "        </head>\n"
-                                + "        <body class=\"is-preload\">\n"
-                                + "            <!-- Wrapper -->\n"
-                                + "            <div id=\"wrapper\">\n"
+                                + "							<!-- Logo -->\n"
+                                + "								<a href=\"index.html\" class=\"logo\">\n"
+                                + "									<span class=\"symbol\"><img src=\"images/logo.png\" alt=\"\" /></span><span class=\"title\">Kera          Lokal</span>\n"
+                                + "								</a>\n"
                                 + "\n"
-                                + "                <!-- Header -->\n"
-                                + "                <header id=\"header\">\n"
-                                + "                    <div class=\"inner\">\n"
+                                + "							<!-- Nav -->\n"
+                                + "								<nav>\n"
+                                + "									<ul>\n"
+                                + "										<li><a href=\"#menu\">Menu</a></li>\n"
+                                + "									</ul>\n"
+                                + "								</nav>\n"
                                 + "\n"
-                                + "                        <!-- Logo -->\n"
-                                + "                        <a href=\"index.html\" class=\"logo\">\n"
-                                + "                            <span class=\"symbol\"><img src=\"images/logo.png\" alt=\"\" /></span><span class=\"title\">Kera          Lokal</span>\n"
-                                + "                        </a>\n"
+                                + "						</div>\n"
+                                + "					</header>\n"
                                 + "\n"
-                                + "                        <!-- Nav -->\n"
-                                + "                        <nav>\n"
-                                + "                            <ul>\n"
-                                + "                                <li><a href=\"#menu\">Menu</a></li>\n"
-                                + "                            </ul>\n"
-                                + "                        </nav>\n"
+                                + "				<!-- Menu -->\n"
+                                + "					<nav id=\"menu\">\n"
+                                + "						<h2>Menu</h2>\n"
+                                + "						<ul>\n"
+                                + "							<li><a href=\"./_home_cust\">Home</a></li>\n"
+                                + "							<li><a href=\"./logout2_\">Logout</a></li>\n"
+                                + "						</ul>\n"
+                                + "					</nav>\n"
                                 + "\n"
-                                + "                    </div>\n"
-                                + "                </header>\n"
+                                + "				<!-- Main -->\n"
+                                + "					<div id=\"main\">\n"
+                                + "						<div class=\"inner\">\n"
+                                + "							<header>\n"
+                                + "								<h1>Produk oleh " + tokonya.getNama_toko() + "</h1>\n"
+                                + "								<blockquote><i class=\"fas fa-phone-alt\"> "+tokonya.getKontak_toko()+"</i><br><i class=\"fas fa-home\"> "+tokonya.getAlamat_toko()+"</i></blockquote>"
+                                + "                                                             <p>Toko bergabung sejak "+tglGabung+"</p>\n"
+                                + "							</header>\n"
+                                + "							<section class=\"tiles\">\n");
+
+                        for (int i = 0; i < products.size(); i++) {
+                            out.println("                                                       <article>\n"
+                                    + "									<span class=\"image\">\n"
+                                    + "                                                                            <img src=\"./productImage_loader?idProduk_=" + products.get(i).getId_produk() + "\" alt=\"\" width=\"360\" height=\"460\"/>\n"
+                                    + "									</span>\n"
+                                    + "									<a href=\"./detail_produk?idProduk_=" + products.get(i).getId_produk() + "\">\n"
+                                    + "										<h2>" + products.get(i).getNama_produk() + "</h2>\n"
+                                    + "										<div class=\"content\">\n"
+                                    + "                                                                                    <p>" + products.get(i).getJenis_produk() + "</p>\n"
+                                    + "                                                                                    <h3>Rp. " + products.get(i).getHarga_produk() + "</h3>"
+                                    + "										</div>\n"
+                                    + "									</a>\n"
+                                    + "								</article>");
+                        }
+
+                        out.println("							</section>\n"
+                                + "						</div>\n"
+                                + "					</div>\n"
                                 + "\n"
-                                + "                <!-- Menu -->\n"
-                                + "                <nav id=\"menu\">\n"
-                                + "                    <h2>Menu</h2>\n"
-                                + "                    <ul>\n"
-                                + "                        <li><a href=\"index.html\">Home</a></li>\n"
-                                + "                        <li><a href=\"./halaman_login\">Login/Daftar</a></li>\n"
-                                + "                    </ul>\n"
-                                + "                </nav>\n"
+                                + "				<!-- Footer -->\n"
+                                + "					<footer id=\"footer\">\n"
+                                + "						<div class=\"inner\">\n"
+                                + "							<ul class=\"copyright\">\n"
+                                + "								<li>&copy; Untitled. All rights reserved</li><li>Design: <a href=\"http://html5up.net\">HTML5 UP</a> x FRANSISCO DIAZ</li>\n"
+                                + "							</ul>\n"
+                                + "						</div>\n"
+                                + "					</footer>\n"
                                 + "\n"
-                                + "                <!-- Main -->\n"
-                                + "                <div id=\"main\">\n"
-                                + "                    <div class=\"inner\">\n"
-                                + "\n                   <div class=\"jumbotron\">\n"
-                                + "                             <p>Produk oleh <a href=\"./lihat_toko?idToko_="+idToko+"\">"+nama_tokonya+"</a> ditambahkan pada "+tgl_masuk+"</p>\n"
-                                + "                     </div>"
-                                + "                        <main class=\"container\">\n"
+                                + "			</div>\n"
                                 + "\n"
-                                + "                            <div class=\"left-column\">\n"
-                                + "                                <img src=\"./productImage_loader?idProduk_=" + dftr_produk.getId_produk() + "\" width=\"360\" height=\"460\" >\n"
-                                + "                            </div>\n"
+                                + "		<!-- Scripts -->\n"
+                                + "			<script src=\"assets/js/jquery.min.js\"></script>\n"
+                                + "			<script src=\"assets/js/browser.min.js\"></script>\n"
+                                + "			<script src=\"assets/js/breakpoints.min.js\"></script>\n"
+                                + "			<script src=\"assets/js/util.js\"></script>\n"
+                                + "			<script src=\"assets/js/main.js\"></script>\n"
                                 + "\n"
-                                + "\n"
-                                + "                            <!-- Right Column -->\n"
-                                + "                            <div class=\"right-column\">\n"
-                                + "\n"
-                                + "                                <!-- Product Description -->\n"
-                                + "                                <div class=\"product-description\">\n"
-                                + "                                    <h1>" + dftr_produk.getNama_produk() + "</h1>\n"
-                                + "                                    <p>" + dftr_produk.getKeterangan_produk() + "</p>\n"
-                                + "                                    <h2>Rp. "+dftr_produk.getHarga_produk()+"</h2>"
-                                + "                                </div>\n"
-                                + "                                <form>\n"
-                                + "                                    <div>\n"
-                                + "                                        <h4> Stok : " + stok + "</h4><div class=\"qty-input\"><i class=\"less\">-</i>\n"
-                                + "                                            <input type=\"text\" value=\"1\"/><i class=\"more\">+</i>\n"
-                                + "                                        </div>\n"
-                                + "                                        <ul class=\"actions\">\n"
-                                + "                                            <li><a href=\"#\" class=\"button primary\">Masukkan ke Keranjang</a></li>\n"
-                                + "                                        </ul>\n"
-                                + "                                    </div>\n"
-                                + "                                </form>\n"
-                                + "                            </div>\n"
-                                + "                        </main>\n"
-                                + "\n"
-                                + "                    </div>\n"
-                                + "                </div>\n"
-                                + "\n"
-                                + "                <!-- Footer -->\n"
-                                + "                <footer id=\"footer\">\n"
-                                + "                    <div class=\"inner\">\n"
-                                + "                        <ul class=\"copyright\">\n"
-                                + "                            <li>&copy; Untitled. All rights reserved</li><li>Design: <a href=\"http://html5up.net\">HTML5 UP</a> and FRANSISCO DIAZ ATMARESTANTO</li>\n"
-                                + "                        </ul>\n"
-                                + "                    </div>\n"
-                                + "                </footer>\n"
-                                + "\n"
-                                + "            </div>\n"
-                                + "\n"
-                                + "            <!-- Scripts -->\n"
-                                + "            <script src=\"assets/js/jquery.min.js\"></script>\n"
-                                + "            <script src=\"assets/js/browser.min.js\"></script>\n"
-                                + "            <script src=\"assets/js/breakpoints.min.js\"></script>\n"
-                                + "            <script src=\"assets/js/util.js\"></script>\n"
-                                + "            <script src=\"assets/js/main.js\"></script>\n"
-                                + "        </body>\n"
-                                + "    </html>");
+                                + "	</body>\n"
+                                + "</html>");
                     } finally {
                         out.close();
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(detail_produk.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(_home_cust.class.getName()).log(Level.SEVERE, null, ex);
                     String pesan_error = ex.getMessage();
                     out.println("<!DOCTYPE html>\n"
                             + "<html lang=\"en\" >\n"

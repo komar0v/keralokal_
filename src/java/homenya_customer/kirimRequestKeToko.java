@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package homenya_penjual;
+package homenya_customer;
 
+import homenya_penjual.simpan_produkBaru;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -32,9 +33,9 @@ import kelas_java.db_connection;
  */
 @MultipartConfig(location = "/.", fileSizeThreshold = 1024 * 1024,
         maxFileSize = 1024 * 1024 * 5, maxRequestSize = 1024 * 1024 * 5 * 5)
-@WebServlet(name = "simpan_produkBaru", urlPatterns = {"/simpan_produkBaru"})
-public class simpan_produkBaru extends HttpServlet {
-
+@WebServlet(name = "kirimRequestKeToko", urlPatterns = {"/kirimRequestKeToko"})
+public class kirimRequestKeToko extends HttpServlet {
+    
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
     Date date = new Date();
 
@@ -63,74 +64,56 @@ public class simpan_produkBaru extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String idToko = null;
-        String tanggal_produk_masuk = formatter.format(date);
+        String idToko = request.getParameter("idToko");
+        String tanggal_produk_direquest = formatter.format(date);
 
+        String idAkun_ = null;
         Cookie[] cookies = request.getCookies();
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals("idAkun")) {
-                idToko = cookie.getValue();
+                idAkun_ = cookie.getValue();
             }
         }
 
         InputStream inputStream;
         Part filePart;
-        filePart = request.getPart("fotoProduk");
+        filePart = request.getPart("fotoProdukReq");
         inputStream = filePart.getInputStream();
         PrintWriter out = response.getWriter();
         Random rnd = new Random();
         int number = rnd.nextInt(996996);
 
         String id_produkSTR = String.format("%06d", number);
-        int idnyaProduk = Integer.parseInt(id_produkSTR);
-        
-        int stok_produk = Integer.parseInt(request.getParameter("stokProduk"));
+        int idnyaProdukReq = Integer.parseInt(id_produkSTR);
         
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection conn = db_connection.connect_to_Db();
             int idToko_int = Integer.parseInt(idToko);
 
-            OBJ_produk produk = new OBJ_produk();
-            produk.setId_produk(id_produkSTR);
-            produk.setNama_produk(request.getParameter("namaProduk"));
-            produk.setKeterangan_produk(request.getParameter("keteranganProduk"));
-            produk.setJenis_produk(request.getParameter("jenisProduk"));
-            produk.setStock_produk(stok_produk);
-            produk.setHarga_produk(Double.parseDouble(request.getParameter("hargaProduk")));
-
-            PreparedStatement PSaddproduk = conn.prepareStatement("INSERT INTO tabel_produk VALUES (?,?,?,?,?,?,?,?,?)");
-            PSaddproduk.setInt(1, idnyaProduk);
+            PreparedStatement PSaddproduk = conn.prepareStatement("INSERT INTO tabel_kotak_masuk VALUES (?,?,?,?,?,?,?,?)");
+            PSaddproduk.setInt(1, idnyaProdukReq);
             PSaddproduk.setInt(2, idToko_int);
-            PSaddproduk.setString(3, tanggal_produk_masuk);
-            PSaddproduk.setString(4, produk.getNama_produk());
-            PSaddproduk.setInt(5, produk.getStock_produk());
-            PSaddproduk.setString(6, produk.getKeterangan_produk());
-            PSaddproduk.setString(7, produk.getJenis_produk());
-            PSaddproduk.setDouble(8, produk.getHarga_produk());
-            PSaddproduk.setBlob(9, inputStream);
+            PSaddproduk.setString(3,idAkun_);
+            PSaddproduk.setString(4, request.getParameter("namaProdukReq"));
+            PSaddproduk.setString(5, request.getParameter("keteranganProdukReq"));
+            PSaddproduk.setBlob(6, inputStream);
+            PSaddproduk.setString(7, "barumasuk");
+            PSaddproduk.setString(8, tanggal_produk_direquest);
             PSaddproduk.executeUpdate();
             conn.close();
 
             try {
-                out.println("<script>\n"
-                + "\n"
-                + "  var txt;\n"
-                + "  var r = confirm(\"Berhasil tambahkan produk. Tambah produk lain?\");\n"
-                + "  if (r == true) {\n"
-                + "    location='./seller_urusanProduk';\n"
-                + "  } else {\n"
-                + "    location='./seller_viewProducts';\n"
-                + "  }\n"
-                + "  "
-                + "\n"
-                + "</script>");
+                out.println("<script type=\"text/javascript\">");
+                out.println("alert('Berhasil mengirim request! Silahkan tunggu jika permintaan diterima maka produk tampil pada home.');");
+                out.println("location='./_home_cust';");
+                out.println("</script>");
             } finally {
                 out.close();
             }
 
         } catch (Exception ex) {
-            Logger.getLogger(simpan_produkBaru.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(kirimRequestKeToko.class.getName()).log(Level.SEVERE, null, ex);
             String pesan_error = ex.getMessage();
             out.println("<!DOCTYPE html>\n"
                     + "<html lang=\"en\" >\n"

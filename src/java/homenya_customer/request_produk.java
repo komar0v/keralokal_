@@ -10,7 +10,6 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -19,16 +18,14 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import kelas_java.OBJ_produk;
-import kelas_java.OBJ_toko;
 import kelas_java.db_connection;
 
 /**
  *
  * @author ASUS
  */
-@WebServlet(name = "lihat_toko", urlPatterns = {"/lihat_toko"})
-public class lihat_toko extends HttpServlet {
+@WebServlet(name = "request_produk", urlPatterns = {"/request_produk"})
+public class request_produk extends HttpServlet {
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -44,7 +41,7 @@ public class lihat_toko extends HttpServlet {
             throws ServletException, IOException {
         PrintWriter out = response.getWriter();
         String nama_user = null;
-        String sessionID = null;
+        String idAkun_ = null;
         String levelAkun = null;
 
         Cookie[] cookies = request.getCookies();
@@ -53,8 +50,8 @@ public class lihat_toko extends HttpServlet {
                 if (cookie.getName().equals("namaUser")) {
                     nama_user = cookie.getValue();
                 }
-                if (cookie.getName().equals("JSESSIONID")) {
-                    sessionID = cookie.getValue();
+                if (cookie.getName().equals("idAkun")) {
+                    idAkun_ = cookie.getValue();
                 }
                 if (cookie.getName().equals("levelAkun")) {
                     levelAkun = cookie.getValue();
@@ -65,36 +62,13 @@ public class lihat_toko extends HttpServlet {
                     Class.forName("com.mysql.jdbc.Driver");
                     Connection conn = db_connection.connect_to_Db();
                     String idToko = request.getParameter("idToko_");
+                    String namaToko = null;
 
-                    PreparedStatement ps = conn.prepareStatement("SELECT product_id, nama_produk, jenis_produk, harga_produk FROM tabel_produk WHERE inserted_by=?");
-                    ps.setString(1, idToko);
-                    ResultSet rs = ps.executeQuery();
-
-                    ArrayList<OBJ_produk> products = new ArrayList<OBJ_produk>();
-                    while (rs.next()) {
-                        int prodId_int = rs.getInt("product_id");
-                        String prodId_str = Integer.toString(prodId_int);
-                        OBJ_produk dftr_produk = new OBJ_produk();
-                        dftr_produk.setId_produk(prodId_str);
-                        dftr_produk.setNama_produk(rs.getString("nama_produk"));
-                        dftr_produk.setJenis_produk(rs.getString("jenis_produk"));
-                        dftr_produk.setHarga_produk(rs.getDouble("harga_produk"));
-
-                        products.add(dftr_produk);
-                    }
-
-                    PreparedStatement psDetailtoko = conn.prepareStatement("SELECT nama_toko, alamat_toko, notel_toko, registration_date FROM tabel_toko WHERE id_toko=?");
+                    PreparedStatement psDetailtoko = conn.prepareStatement("SELECT nama_toko FROM tabel_toko WHERE id_toko=?");
                     psDetailtoko.setString(1, idToko);
                     ResultSet rs2 = psDetailtoko.executeQuery();
-
-                    String tglGabung = null;
-                    OBJ_toko tokonya = new OBJ_toko();
                     while (rs2.next()) {
-
-                        tokonya.setNama_toko(rs2.getString("nama_toko"));
-                        tokonya.setAlamat_toko(rs2.getString("alamat_toko"));
-                        tokonya.setKontak_toko(rs2.getString("notel_toko"));
-                        tglGabung = rs2.getString("registration_date");
+                        namaToko = rs2.getString("nama_toko");
                     }
 
                     try {
@@ -144,29 +118,17 @@ public class lihat_toko extends HttpServlet {
                                 + "					<div id=\"main\">\n"
                                 + "						<div class=\"inner\">\n"
                                 + "							<header>\n"
-                                + "								<center><img src=\"./storeLogo_loader?idToko_=" + idToko + "\" width=\"180\" height=\"150\"/></center>"
-                                + "								<blockquote><i class=\"fas fa-phone-alt\"> " + tokonya.getKontak_toko() + "</i><br><i class=\"fas fa-home\"> " + tokonya.getAlamat_toko() + "</i><br> Ingin request produk? Bisa menuju link ini > <a href=\"./request_produk?idToko_="+idToko+"\">Klik Disini!</a></blockquote>"
-                                + "                                                             <p>Toko bergabung sejak " + tglGabung + "</p>\n"
-                                + "                                                     <h1>Produk oleh " + tokonya.getNama_toko() + "</h1>\n"
-                                + "							</header>\n"
-                                + "							<section class=\"tiles\">\n");
-
-                        for (int i = 0; i < products.size(); i++) {
-                            out.println("                                                       <article>\n"
-                                    + "									<span class=\"image\">\n"
-                                    + "                                                                            <img src=\"./productImage_loader?idProduk_=" + products.get(i).getId_produk() + "\" alt=\"\" width=\"360\" height=\"460\"/>\n"
-                                    + "									</span>\n"
-                                    + "									<a href=\"./detail_produk?idProduk_=" + products.get(i).getId_produk() + "\">\n"
-                                    + "										<h2>" + products.get(i).getNama_produk() + "</h2>\n"
-                                    + "										<div class=\"content\">\n"
-                                    + "                                                                                    <p>" + products.get(i).getJenis_produk() + "</p>\n"
-                                    + "                                                                                    <h3>Rp. " + products.get(i).getHarga_produk() + "</h3>"
-                                    + "										</div>\n"
-                                    + "									</a>\n"
-                                    + "								</article>");
-                        }
-
-                        out.println("							</section>\n"
+                                + "								<h1>Request Produk ke " + namaToko + "</h1>\n"
+                                + "								<p>Selain belanja, kamu juga bisa request produk ke toko sesuai keinginanmu loh, " + nama_user + ". :)</p>\n"
+                                + "							</header><hr>\n"
+                                + "                                                             <form enctype=\"multipart/form-data\" method=\"POST\" action=\"./kirimRequestKeToko\">"
+                                + "                                                                             <input type=\"hidden\" id=\"demo-name\" value=\"" + idToko + "\" required name=\"idToko\"/>"
+                                + "										<input type=\"text\" name=\"namaProdukReq\" value=\"\" required placeholder=\"Nama Produk\" />\n"
+                                + "                                                                             <textarea placeholder=\"Keterangan Barang\" required name=\"keteranganProdukReq\"></textarea>"
+                                + "                                                                             <br><p>Desain Barang</p>"
+                                + "                                                                             <input type=\"file\" class=\"button primary fit\" name=\"fotoProdukReq\" required accept=\"image/*\"/>\n"
+                                + "                                                                             <input type=\"submit\" value=\"Request Produk!\" class=\"primary\" />"
+                                + "                                                 </form><hr>"
                                 + "						</div>\n"
                                 + "					</div>\n"
                                 + "\n"
@@ -499,6 +461,7 @@ public class lihat_toko extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
     }
 
     /**

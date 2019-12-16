@@ -5,6 +5,8 @@
  */
 package homenya_admin;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 /**
@@ -18,7 +20,7 @@ public class tesRandom {
         int number = rnd.nextInt(999999);
 
         System.out.println(String.format("%06d", number));
-        
+
         String SALTCHARS = "ABCDEFGHIJKL1234567890MNOPQRSTUVWXYZ";
         StringBuilder salt = new StringBuilder();
         while (salt.length() < 18) {
@@ -27,5 +29,10 @@ public class tesRandom {
         }
         String saltStr = salt.toString();
         System.out.println(saltStr);
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        Date date = new Date();
+        String tx_time = formatter.format(date);
+        System.out.println(tx_time);
     }
 }

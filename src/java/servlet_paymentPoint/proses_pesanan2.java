@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Random;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -22,7 +25,6 @@ import kelas_java.db_connection;
  */
 @WebServlet(name = "proses_pesanan2", urlPatterns = {"/proses_pesanan2"})
 public class proses_pesanan2 extends HttpServlet {
-
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -55,23 +57,106 @@ public class proses_pesanan2 extends HttpServlet {
             String atasNama = request.getParameter("atas_nama");
             String idUser = request.getParameter("idnyaUser");
             String kodeUnik = request.getParameter("kodeUnik");
-            
+            String nilaiTx = request.getParameter("besarnya_transaksi");
+
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date date = new Date();
+            String tx_time = formatter.format(date);
+
+            Random rnd = new Random();
+            int number = rnd.nextInt(996969);
+
+            String trxID = (String.format("%06d", number));
+
             Class.forName("com.mysql.jdbc.Driver");
             Connection conn = db_connection.connect_to_Db();
 
-            String idProduk_str = request.getParameter("idProduk_");
-            int idProduk_int = Integer.parseInt(idProduk_str);
-
-            PreparedStatement psDelete = conn.prepareStatement("INSERT INTO tabel_transaksi VALUES (?,?,?,?,?)");
-            psDelete.setInt(1, idProduk_int);
-            psDelete.executeUpdate();
+            PreparedStatement transaction_ = conn.prepareStatement("INSERT INTO tabel_transaksi VALUES (?,?,?,?,?,?)");
+            transaction_.setString(1, trxID);
+            transaction_.setString(2, idUser);
+            transaction_.setString(3, atasNama);
+            transaction_.setString(4, nilaiTx);
+            transaction_.setString(5, "unpayed");
+            transaction_.setString(6, tx_time);
+            transaction_.executeUpdate();
 
             conn.close();
             try {
-                out.println("<script type=\"text/javascript\">");
-                out.println("alert('Berhasil menghapus produk');");
-                out.println("location='./view_urusanProduk';");
-                out.println("</script>");
+                out.println("<!DOCTYPE HTML>\n"
+                        + "<html>\n"
+                        + "	<head>\n"
+                        + "		<title>Kera Lokal Home</title>\n"
+                        + "		<meta charset=\"utf-8\" />\n"
+                        + "		<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\" />\n"
+                        + "		<link rel=\"stylesheet\" href=\"assets/css/main.css\" />\n"
+                        + "		<noscript><link rel=\"stylesheet\" href=\"assets/css/noscript.css\" /></noscript>\n"
+                        + "	</head>\n"
+                        + "	<body class=\"is-preload\">\n"
+                        + "		<!-- Wrapper -->\n"
+                        + "			<div id=\"wrapper\">\n"
+                        + "\n"
+                        + "				<!-- Header -->\n"
+                        + "					<header id=\"header\">\n"
+                        + "						<div class=\"inner\">\n"
+                        + "\n"
+                        + "							<!-- Logo -->\n"
+                        + "								<a href=\"./_home_cust\" class=\"logo\">\n"
+                        + "									<span class=\"symbol\"><img src=\"images/logo.png\" alt=\"\" /></span><span class=\"title\">Kera          Lokal</span>\n"
+                        + "								</a>\n"
+                        + "\n"
+                        + "							<!-- Nav -->\n"
+                        + "								<nav>\n"
+                        + "									<ul>\n"
+                        + "										<li><a href=\"#menu\">Menu</a></li>\n"
+                        + "									</ul>\n"
+                        + "								</nav>\n"
+                        + "\n"
+                        + "						</div>\n"
+                        + "					</header>\n"
+                        + "\n"
+                        + "				<!-- Menu -->\n"
+                        + "					<nav id=\"menu\">\n"
+                        + "						<h2>Menu</h2>\n"
+                        + "						<ul>\n"
+                        + "                                                     <li><a href=\"./_home_cust\">Home</a></li>\n"
+                        + "                                                     <li><a href=\"./keranjang_belanja\">Keranjang</a></li>\n"
+                        + "							<li><a href=\"./logout2_\">Logout</a></li>\n"
+                        + "						</ul>\n"
+                        + "					</nav>\n"
+                        + "\n"
+                        + "				<!-- Main -->\n"
+                        + "					<div id=\"main\">\n"
+                        + "						<div class=\"inner\">\n"
+                        + "							<header>\n"
+                        + "								<h1>Proses Pembayaran " + atasNama + "</h1>\n"
+                        + "								<p>Selesaikan pembayaran Anda.</p>\n"
+                        + "							</header><hr>\n"
+                        + "      <center>  "
+                        + "          <h1>Total Rp. " + nilaiTx + "</h1>"
+                        + "   <h3>payment code</h3>"
+                        + "   <h2>" + kodeUnik + "</h2>"
+                                + "<h4>Bayar di "+metodeBayar+"</h4></center>"
+                        + "				<!-- Footer -->\n"
+                        + "					<footer id=\"footer\">\n"
+                        + "						<div class=\"inner\">\n"
+                        + "							<ul class=\"copyright\">\n"
+                        + "								<li>&copy; Untitled. All rights reserved</li><li>Design: <a href=\"http://html5up.net\">HTML5 UP</a> x FRANSISCO DIAZ</li>\n"
+                        + "							</ul>\n"
+                        + "						</div>\n"
+                        + "					</footer>\n"
+                        + "\n"
+                        + "			</div>\n"
+                        + "\n"
+                        + "		<!-- Scripts -->\n"
+                        + "			<script src=\"assets/js/jquery.min.js\"></script>\n"
+                        + "			<script src=\"assets/js/browser.min.js\"></script>\n"
+                        + "			<script src=\"assets/js/breakpoints.min.js\"></script>\n"
+                        + "			<script src=\"assets/js/util.js\"></script>\n"
+                        + "			<script src=\"assets/js/main.js\"></script>\n"
+                        + "                     <script src=\"assets/js/script_keranjang.js\"></script>"
+                        + "\n"
+                        + "	</body>\n"
+                        + "</html>");
             } finally {
                 out.close();
             }

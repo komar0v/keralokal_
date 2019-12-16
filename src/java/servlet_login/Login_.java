@@ -60,6 +60,7 @@ public class Login_ extends HttpServlet {
         String id_akun = "";
         String nama_user = "";
         String level_akun = "";
+        String alamat_cust = "";
         PrintWriter out = response.getWriter();
 
         try {
@@ -80,6 +81,7 @@ public class Login_ extends HttpServlet {
                 pswd = rs.getString("password_cust");
                 nama_user = rs.getString("namadepan_cust");
                 level_akun = rs.getString("level_akun");
+                alamat_cust = rs.getString("alamat_cust");
             }
             rs.close();
 
@@ -128,9 +130,11 @@ public class Login_ extends HttpServlet {
                 Cookie namaUser = new Cookie("namaUser", nama_user);
                 Cookie levelAkun = new Cookie("levelAkun", level_akun);
                 Cookie idAkun = new Cookie("idAkun", id_akun);
+                Cookie alamatCust = new Cookie("alamatCust", alamat_cust);
                 response.addCookie(levelAkun);
                 response.addCookie(namaUser);
                 response.addCookie(idAkun);
+                response.addCookie(alamatCust);
                 response.sendRedirect("./_home_cust");
             } else if (uname.equals(usrName) && pswd.equals(passWd) && level_akun.equals("admin")) {
                 //get the old session and invalidate

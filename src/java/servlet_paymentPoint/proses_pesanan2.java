@@ -54,10 +54,12 @@ public class proses_pesanan2 extends HttpServlet {
         PrintWriter out = response.getWriter();
         try {
             String metodeBayar = request.getParameter("paymentSelect");
+            String metodeKirim = request.getParameter("shipmentSelect");
             String atasNama = request.getParameter("atas_nama");
             String idUser = request.getParameter("idnyaUser");
             String kodeUnik = request.getParameter("kodeUnik");
             String nilaiTx = request.getParameter("besarnya_transaksi");
+            String alamat_tujuan = request.getParameter("alamat_tujuan");
 
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             Date date = new Date();
@@ -135,7 +137,8 @@ public class proses_pesanan2 extends HttpServlet {
                         + "          <h1>Total Rp. " + nilaiTx + "</h1>"
                         + "   <h3>payment code</h3>"
                         + "   <h2>" + kodeUnik + "</h2>"
-                                + "<h4>Bayar di "+metodeBayar+"</h4></center>"
+                                + "<h4>Bayar di "+metodeBayar+"</h4>"
+                                        + "<pre>Alamat Pengiriman\n"+alamat_tujuan+"\nShipment by "+metodeKirim+"</pre></center>"
                         + "				<!-- Footer -->\n"
                         + "					<footer id=\"footer\">\n"
                         + "						<div class=\"inner\">\n"

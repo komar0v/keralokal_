@@ -26,13 +26,37 @@ import kelas_java.db_connection;
  *
  * @author ASUS
  */
-@WebServlet(name = "_home_cust", urlPatterns = {"/_home_cust"})
-public class _home_cust extends HttpServlet {
+@WebServlet(name = "cari_produkResult", urlPatterns = {"/cari_produkResult"})
+public class cari_produkResult extends HttpServlet {
 
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+    }
+
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         PrintWriter out = response.getWriter();
+        String kataKunci = request.getParameter("kata_kunci_pencarian");
         String nama_user = null;
         String sessionID = null;
         String levelAkun = null;
@@ -55,7 +79,7 @@ public class _home_cust extends HttpServlet {
                     Class.forName("com.mysql.jdbc.Driver");
                     Connection conn = db_connection.connect_to_Db();
 
-                    PreparedStatement ps = conn.prepareStatement("SELECT product_id, nama_produk, jenis_produk, harga_produk FROM tabel_produk");
+                    PreparedStatement ps = conn.prepareStatement("SELECT product_id, nama_produk, jenis_produk, harga_produk FROM tabel_produk WHERE nama_produk LIKE '%"+kataKunci+"%'");
                     ResultSet rs = ps.executeQuery();
 
                     ArrayList<OBJ_produk> products = new ArrayList<OBJ_produk>();
@@ -118,8 +142,8 @@ public class _home_cust extends HttpServlet {
                                 + "					<div id=\"main\">\n"
                                 + "						<div class=\"inner\">\n"
                                 + "							<header>\n"
-                                + "								<h1>Selamat datang " + nama_user + "</h1>\n"
-                                + "								<p>Belanja Kerajinan Tangan Lokal kini tidak perlu ribet. Anda tinggal menunggu dirumah sembari minum kopi atau menonton Netflix. Pengrajin kami menerima request barang sesuai keiinginan hati para pembelinya, AYO PESAN SEKARANG!</p>\n"
+                                + "								<h1>Hasil untuk pencarian " + kataKunci + "</h1>\n"
+                                + "								<p>Tidak ada yang dicari? Bisa request produk loh!</p>\n"
                                 + "							</header>\n"
                                 + "							<section class=\"tiles\">\n");
 
@@ -167,7 +191,7 @@ public class _home_cust extends HttpServlet {
                         out.close();
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(_home_cust.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(cari_produkResult.class.getName()).log(Level.SEVERE, null, ex);
                     String pesan_error = ex.getMessage();
                     out.println("<!DOCTYPE html>\n"
                             + "<html lang=\"en\" >\n"
@@ -458,20 +482,6 @@ public class _home_cust extends HttpServlet {
         } else {
             response.sendRedirect("./index.html");
         }
-    }
-
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
     }
 
     /**

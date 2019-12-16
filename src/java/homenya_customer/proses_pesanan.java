@@ -20,6 +20,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import kelas_java.OBJ_kurir;
 import kelas_java.OBJ_metodepembayaran;
 import kelas_java.db_connection;
 
@@ -73,6 +74,7 @@ public class proses_pesanan extends HttpServlet {
 
         String nama_user = null;
         String idAkun = null;
+        String alamatCust = null;
         String levelAkun = null;
 
         Cookie[] cookies = request.getCookies();
@@ -87,6 +89,9 @@ public class proses_pesanan extends HttpServlet {
                 if (cookie.getName().equals("idAkun")) {
                     idAkun = cookie.getValue();
                 }
+                if (cookie.getName().equals("alamatCust")) {
+                    alamatCust = cookie.getValue();
+                }
             }
             if (levelAkun.equals("user")) {
                 try {
@@ -97,7 +102,6 @@ public class proses_pesanan extends HttpServlet {
                     ResultSet rs = ps.executeQuery();
 
                     ArrayList<OBJ_metodepembayaran> payment = new ArrayList<OBJ_metodepembayaran>();
-                    int urutan = 0;
                     while (rs.next()) {
 
                         OBJ_metodepembayaran payment_list = new OBJ_metodepembayaran();
@@ -106,6 +110,19 @@ public class proses_pesanan extends HttpServlet {
 
                         payment.add(payment_list);
                     }
+
+                    PreparedStatement ps2 = conn.prepareStatement("SELECT id_kurir, nama_kurir FROM tabel_kurir");
+                    ResultSet rs2 = ps2.executeQuery();
+                    ArrayList<OBJ_kurir> kurir = new ArrayList<OBJ_kurir>();
+                    while (rs2.next()) {
+
+                        OBJ_kurir kurir_list = new OBJ_kurir();
+                        kurir_list.setId_kurir(rs2.getInt("id_kurir"));
+                        kurir_list.setNama_kurir(rs2.getString("nama_kurir"));
+
+                        kurir.add(kurir_list);
+                    }
+
                     try {
                         out.println("<!DOCTYPE HTML>\n"
                                 + "<html>\n"
@@ -177,9 +194,21 @@ public class proses_pesanan extends HttpServlet {
                                 + "						</tr>\n"
                                 + "						</tfoot>"
                                 + "                                      </table>"
-                                + "</div>"
-                                + "<center><h2>METODE PEMBAYARAN</h2><form method=\"POST\" action=\"./proses_pesanan2\">"
+                                + "<p>Pesanan dikirim ke " + alamatCust + "</p></div>"
+                                + "<center><h2>METODE PENGIRIMAN</h2><form method=\"POST\" action=\"./proses_pesanan2\">"
                                 + "             <ul class=\"alt\">\n");
+
+                        int urutanKurir = 0;
+                        for (int i = 0; i < kurir.size(); i++) {
+                            urutanKurir = urutanKurir + 1;
+                            out.println("<li>"
+                                    + "      <div class=\"col-4 col-12-small\">\n"
+                                    + "         <input type=\"radio\" id=\"ship_" + urutanKurir + "\" name=\"shipmentSelect\" value=\"" + kurir.get(i).getNama_kurir() + "\">\n"
+                                    + "		<label for=\"ship_" + urutanKurir + "\"><img src=\"./shippingLogo_loader?idKurir_=" + kurir.get(i).getId_kurir() + "\" width=\"220\" height=\"130\"/></label>\n"
+                                    + "      </div>"
+                                    + "</li>\n");
+                        }
+                        out.println("<h2>METODE PEMBAYARAN</h2>");
                         int urutanPayment = 0;
                         for (int i = 0; i < payment.size(); i++) {
                             urutanPayment = urutanPayment + 1;
@@ -195,6 +224,7 @@ public class proses_pesanan extends HttpServlet {
                                 + "     <input type=\"hidden\" name=\"atas_nama\" value=\"" + nama_user + "\" />\n"
                                 + "     <input type=\"hidden\" name=\"besarnya_transaksi\" value=\"" + totalHarga + "\" \n/>"
                                 + "     <input type=\"hidden\" name=\"kodeUnik\" value=\"" + kode_unik + "\" \n/>"
+                                + "     <input type=\"hidden\" name=\"alamat_tujuan\" value=\"" + alamatCust + "\" \n/>"
                                 + "     <button class=\"button icon solid\" type=\"submit\">BAYAR</button>\n"
                                 + "						</form></center></div>\n"
                                 + "					</div>\n"

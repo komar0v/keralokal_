@@ -188,7 +188,7 @@ public class detail_produk extends HttpServlet {
                                 + "                <nav id=\"menu\">\n"
                                 + "                    <h2>Menu</h2>\n"
                                 + "                    <ul>\n"
-                                + "                        <li><a href=\"./_home_cust\">Home</a></li>\n"
+                                + "                        <li><a href=\"./_home_cust\">Home</a><li><a href=\"./cari_produk\">Cari Produk</a></li></li>\n"
                                 + "                        <li><a href=\"./keranjang_belanja\">Keranjang</a></li>\n"
                                 + "                        <li><a href=\"./logout2_\">Logout</a></li>\n"
                                 + "                    </ul>\n"

@@ -26,8 +26,8 @@ import kelas_java.db_connection;
  *
  * @author ASUS
  */
-@WebServlet(name = "seller_kotakMasuk", urlPatterns = {"/seller_kotakMasuk"})
-public class seller_kotakMasuk extends HttpServlet {
+@WebServlet(name = "seller_kotakMasuk_ditolak", urlPatterns = {"/seller_kotakMasuk_ditolak"})
+public class seller_kotakMasuk_ditolak extends HttpServlet {
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -60,7 +60,7 @@ public class seller_kotakMasuk extends HttpServlet {
                     Class.forName("com.mysql.jdbc.Driver");
                     Connection conn = db_connection.connect_to_Db();
 
-                    PreparedStatement ps = conn.prepareStatement("SELECT * FROM tabel_kotak_masuk WHERE request_ke=? AND status_request = 'barumasuk' ");
+                    PreparedStatement ps = conn.prepareStatement("SELECT * FROM tabel_kotak_masuk WHERE request_ke=? AND status_request = 'ditolak' ");
                     ps.setString(1, idAkun);
 
                     ResultSet rs = ps.executeQuery();
@@ -73,8 +73,7 @@ public class seller_kotakMasuk extends HttpServlet {
 
                         products.add(produk_req);
                     }
-                    
-                    
+
                     try {
                         out.println("<!DOCTYPE html>\n"
                                 + "<html lang=\"en\" >\n"
@@ -464,9 +463,9 @@ public class seller_kotakMasuk extends HttpServlet {
                                 + "                </div>\n"
                                 + "                <div class=\"panel-body\">\n"
                                 + "                    <ul class=\"nav nav-tabs\">\n"
-                                + "                        <li class=\"active\"><a href=\"#\" data-toggle=\"tab\">Request Produk Masuk</a></li>\n"
-                                + "                        <li class=\"\"><a href=\"./seller_kotakMasuk_diterima\" >Diterima</a>\n"
-                                + "                        <li class=\"\"><a href=\"./seller_kotakMasuk_ditolak\" >Ditolak</a>\n"
+                                + "                        <li ><a href=\"./seller_kotakMasuk\" >Request Produk Masuk</a></li>\n"
+                                + "                        <li ><a href=\"./seller_kotakMasuk_diterima\" >Diterima</a>\n"
+                                + "                        <li class=\"active\"><a href=\"./seller_kotakMasuk_ditolak\" >Ditolak</a>\n"
                                 + "                        </li>\n"
                                 + "                    </ul>\n"
                                 + "\n"
@@ -495,10 +494,11 @@ public class seller_kotakMasuk extends HttpServlet {
                             urutan = urutan + 1;
                             out.println("                    <tr>\n"
                                     + "                        <td>" + urutan + "</td>\n"
-                                    + "                        <td>"+products.get(i).getNama_produk()+"</td>\n"
+                                    + "                        <td>" + products.get(i).getNama_produk() + "</td>\n"
                                     + "                        <td><img src=\"./productReqImage_loader?idProdukReq_=" + products.get(i).getId_produk() + "\" width=\"90\" height=\"50\"/></td>\n"
                                     + "                        <td>\n"
-                                    + "                            <a href=\"./seller_requestProduk_details?idProdukReq_="+products.get(i).getId_produk()+"\" class=\"edit\" title=\"Lihat Detail\" data-toggle=\"tooltip\"><i class=\"material-icons\">remove_red_eye</i></a>\n"
+                                    + "                            <a href=\"./seller_requestProduk_details?idProdukReq_=" + products.get(i).getId_produk() + "\" class=\"edit\" title=\"Tolak\" data-toggle=\"tooltip\"><i class=\"material-icons\">remove_red_eye</i></a>\n"
+                                    + "                            <a href=\"#\" class=\"delete\" title=\"Hapus\" data-toggle=\"tooltip\"><i class=\"material-icons\">delete</i></a>\n"
                                     + "                        </td>\n"
                                     + "                    </tr>\n");
                         }
@@ -846,7 +846,6 @@ public class seller_kotakMasuk extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
     }
 
     /**

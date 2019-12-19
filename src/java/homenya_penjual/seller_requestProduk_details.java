@@ -10,7 +10,6 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -26,8 +25,8 @@ import kelas_java.db_connection;
  *
  * @author ASUS
  */
-@WebServlet(name = "seller_kotakMasuk", urlPatterns = {"/seller_kotakMasuk"})
-public class seller_kotakMasuk extends HttpServlet {
+@WebServlet(name = "seller_requestProduk_details", urlPatterns = {"/seller_requestProduk_details"})
+public class seller_requestProduk_details extends HttpServlet {
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -42,39 +41,45 @@ public class seller_kotakMasuk extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         PrintWriter out = response.getWriter();
-        String levelAkun = null;
+        String nama_user = null;
         String idAkun = null;
+        String levelAkun = null;
 
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("levelAkun")) {
-                    levelAkun = cookie.getValue();
+                if (cookie.getName().equals("namaUser")) {
+                    nama_user = cookie.getValue();
                 }
                 if (cookie.getName().equals("idAkun")) {
                     idAkun = cookie.getValue();
                 }
+                if (cookie.getName().equals("levelAkun")) {
+                    levelAkun = cookie.getValue();
+                }
             }
             if (levelAkun.equals("seller")) {
                 try {
+                    OBJ_produk prdct_details = new OBJ_produk();
                     Class.forName("com.mysql.jdbc.Driver");
                     Connection conn = db_connection.connect_to_Db();
 
-                    PreparedStatement ps = conn.prepareStatement("SELECT * FROM tabel_kotak_masuk WHERE request_ke=? AND status_request = 'barumasuk' ");
+                    PreparedStatement ps = conn.prepareStatement("SELECT id_request, request_dari, nama_barang_request, keterangan_barang FROM tabel_kotak_masuk WHERE request_ke =? AND id_request=?");
+                    String idProduk_ = request.getParameter("idProdukReq_");
                     ps.setString(1, idAkun);
+                    ps.setString(2, idProduk_);
 
                     ResultSet rs = ps.executeQuery();
-                    ArrayList<OBJ_produk> products = new ArrayList<OBJ_produk>();
-                    while (rs.next()) {
-                        OBJ_produk produk_req = new OBJ_produk();
+                    if (rs.next()) {
+                        String idProd_STR = Integer.toString(rs.getInt("id_request"));
 
-                        produk_req.setId_produk(rs.getString("id_request"));
-                        produk_req.setNama_produk(rs.getString("nama_barang_request"));
-
-                        products.add(produk_req);
+                        prdct_details.setId_produk(idProd_STR);
+                        prdct_details.setNama_produk(rs.getString("nama_barang_request"));
+                        prdct_details.setKeterangan_produk(rs.getString("keterangan_barang"));
                     }
-                    
-                    
+
+                    conn.close();
+
                     try {
                         out.println("<!DOCTYPE html>\n"
                                 + "<html lang=\"en\" >\n"
@@ -83,11 +88,6 @@ public class seller_kotakMasuk extends HttpServlet {
                                 + "        <title>Dashboard Toko</title>\n"
                                 + "        <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css\">\n"
                                 + "        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css'>\n"
-                                + "        <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\">\n"
-                                + "        <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/icon?family=Material+Icons\">\n"
-                                + "        <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css\">"
-                                + "        <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js\"></script>\n"
-                                + "        <script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js\"></script>"
                                 + "        <style type=\"text/css\">\n"
                                 + "            @import url('//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css');\n"
                                 + "            @font-face {\n"
@@ -222,100 +222,6 @@ public class seller_kotakMasuk extends HttpServlet {
                                 + "                color: #444;\n"
                                 + "                text-align: left;\n"
                                 + "            }\n"
-                                + "             .table-wrapper {\n"
-                                + "        background: #fff;\n"
-                                + "        padding: 20px 25px;\n"
-                                + "        margin: 30px auto;\n"
-                                + "		border-radius: 3px;\n"
-                                + "        box-shadow: 0 1px 1px rgba(0,0,0,.05);\n"
-                                + "    }\n"
-                                + "    .table-title {\n"
-                                + "		color: #fff;\n"
-                                + "		background: #40b2cd;		\n"
-                                + "		padding: 16px 25px;\n"
-                                + "		margin: -20px -25px 10px;\n"
-                                + "		border-radius: 3px 3px 0 0;\n"
-                                + "    }\n"
-                                + "    .table-title h2 {\n"
-                                + "        margin: 5px 0 0;\n"
-                                + "        font-size: 24px;\n"
-                                + "    }\n"
-                                + "	.search-box {\n"
-                                + "        position: relative;\n"
-                                + "        float: right;\n"
-                                + "    }\n"
-                                + "	.search-box .input-group {\n"
-                                + "		min-width: 300px;\n"
-                                + "		position: absolute;\n"
-                                + "		right: 0;\n"
-                                + "	}\n"
-                                + "	.search-box .input-group-addon, .search-box input {\n"
-                                + "		border-color: #ddd;\n"
-                                + "		border-radius: 0;\n"
-                                + "	}	\n"
-                                + "    .search-box input {\n"
-                                + "        height: 34px;\n"
-                                + "        padding-right: 35px;\n"
-                                + "        background: #f4fcfd;\n"
-                                + "        border: none;\n"
-                                + "        border-radius: 2px !important;\n"
-                                + "    }\n"
-                                + "	.search-box input:focus {\n"
-                                + "        background: #fff;\n"
-                                + "	}\n"
-                                + "	.search-box input::placeholder {\n"
-                                + "        font-style: italic;\n"
-                                + "    }\n"
-                                + "	.search-box .input-group-addon {\n"
-                                + "        min-width: 35px;\n"
-                                + "        border: none;\n"
-                                + "        background: transparent;\n"
-                                + "        position: absolute;\n"
-                                + "        right: 0;\n"
-                                + "        z-index: 9;\n"
-                                + "        padding: 6px 0;\n"
-                                + "    }\n"
-                                + "    .search-box i {\n"
-                                + "        color: #a0a5b1;\n"
-                                + "        font-size: 19px;\n"
-                                + "        position: relative;\n"
-                                + "        top: 2px;\n"
-                                + "    }\n"
-                                + "    table.table {\n"
-                                + "        table-layout: fixed;\n"
-                                + "        margin-top: 15px;\n"
-                                + "    }\n"
-                                + "    table.table tr th, table.table tr td {\n"
-                                + "        border-color: #e9e9e9;\n"
-                                + "    }\n"
-                                + "    table.table th i {\n"
-                                + "        font-size: 13px;\n"
-                                + "        margin: 0 5px;\n"
-                                + "        cursor: pointer;\n"
-                                + "    }\n"
-                                + "    table.table th:first-child {\n"
-                                + "        width: 60px;\n"
-                                + "    }\n"
-                                + "    table.table th:last-child {\n"
-                                + "        width: 120px;\n"
-                                + "    }\n"
-                                + "    table.table td a {\n"
-                                + "        color: #a0a5b1;\n"
-                                + "        display: inline-block;\n"
-                                + "        margin: 0 5px;\n"
-                                + "    }\n"
-                                + "	table.table td a.view {\n"
-                                + "        color: #03A9F4;\n"
-                                + "    }\n"
-                                + "    table.table td a.edit {\n"
-                                + "        color: #FFC107;\n"
-                                + "    }\n"
-                                + "    table.table td a.delete {\n"
-                                + "        color: #E34724;\n"
-                                + "    }\n"
-                                + "    table.table td i {\n"
-                                + "        font-size: 19px;\n"
-                                + "    }"
                                 + "            .sidebar ul li a i {\n"
                                 + "                display: inline-block;\n"
                                 + "                width: 60px;\n"
@@ -431,6 +337,7 @@ public class seller_kotakMasuk extends HttpServlet {
                                 + "                animation-name: swing;\n"
                                 + "            }\n"
                                 + "        </style>\n"
+                                + "\n"
                                 + "    </head>\n"
                                 + "    <body>\n"
                                 + "        <!-- partial:index.partial.html -->\n"
@@ -451,66 +358,46 @@ public class seller_kotakMasuk extends HttpServlet {
                                 + "                <li><a href=\"./seller_urusanPengiriman\"><i class=\"fa fa-truck\"></i><span>Manajemen Pengiriman</span></a></li>\n"
                                 + "                <li><a href=\"./seller_kotakMasuk\"><i class=\"fa fa-envelope\"></i><span>Inbox</span></a></li>\n"
                                 + "                <li><a href=\"./seller_accountSetting?idToko_=" + idAkun + "\"><i class=\"fa fa-wrench\"></i><span>Pengaturan Akun</span></a></li>\n"
-                                + "        <li><a href=\"./logout2_\"><i class=\"fa fa-power-off\"></i><span>Logout</span></a></li>\n"
+                                + "                <li><a href=\"./logout2_\"><i class=\"fa fa-power-off\"></i><span>Logout</span></a></li>\n"
                                 + "            </ul> \n"
                                 + "        </div>\n"
                                 + "\n"
                                 + "        <!-- Content -->\n"
                                 + "        <div class=\"main\">\n"
                                 + "            <div class=\"hipsum\">\n"
-                                + "                <div class=\"panel panel-default\">\n"
-                                + "                <div class=\"panel-heading\">\n"
-                                + "                    Payment\n"
-                                + "                </div>\n"
-                                + "                <div class=\"panel-body\">\n"
-                                + "                    <ul class=\"nav nav-tabs\">\n"
-                                + "                        <li class=\"active\"><a href=\"#\" data-toggle=\"tab\">Request Produk Masuk</a></li>\n"
-                                + "                        <li class=\"\"><a href=\"./seller_kotakMasuk_diterima\" >Diterima</a>\n"
-                                + "                        <li class=\"\"><a href=\"./seller_kotakMasuk_ditolak\" >Ditolak</a>\n"
-                                + "                        </li>\n"
-                                + "                    </ul>\n"
-                                + "\n"
-                                + "                    <div class=\"tab-content\">\n"
-                                + "                        <div class=\"tab-pane fade active in\" id=\"home\">\n"
-                                + "                            <div class=\"table-wrapper\">			\n"
-                                + "            <div class=\"table-title\">\n"
-                                + "                <div class=\"row\">\n"
-                                + "					<div class=\"col-sm-6\">\n"
-                                + "						<h2>Request <b>Masuk</b></h2>\n"
-                                + "					</div>\n"
+                                + "                <div class=\"jumbotron\">\n"
+                                + "                    <h2>Detail Produk</h2>\n"
+                                + "                                    <form action=\"./simpan_perubahanPadaProduk\" method=\"POST\">\n"
+                                + "                                        <div class=\"form-group\">\n"
+                                + "                                            <label>Nama Produk</label>\n"
+                                + "                                            <input name=\"namaProduk\"type=\"text\" class=\"form-control\" id=\"exampleInputEmail1\" required placeholder=\"cth : kaus kaki motif nazi\" value=\"" + prdct_details.getNama_produk() + "\">\n"
+                                + "                                        </div>\n"
+                                + "                                        <div class=\"form-group\">\n"
+                                + "                                            <label>Jenis Produk</label>\n"
+                                + "                                            <input name=\"jenisProduk\"type=\"text\" class=\"form-control\" id=\"exampleInputEmail1\" required placeholder=\"cth : pakaian\" value=\"\">\n"
+                                + "                                        </div>\n"
+                                + "                                        <div class=\"form-group\">\n"
+                                + "                                            <label >Keterangan Produk</label>\n"
+                                + "                                            <textarea rows=\"5\" type=\"text\" class=\"form-control\" name=\"keteranganProduk\" required>" + prdct_details.getKeterangan_produk() + "</textarea>"
+                                + "                                        </div>\n"
+                                + "                                        <div class=\"form-inline\">\n"
+                                + "                                            <label >Stok Produk</label>\n"
+                                + "                                            <input name=\"stokProduk\"type=\"number\" min=\"1\" class=\"form-control\" required id=\"exampleInputEmail1\" value=\"\">"
+                                + "                                        &nbsp;&nbsp;&nbsp;<label >Harga Produk&nbsp; Rp.</label>\n"
+                                + "                                            <input name=\"hargaProduk\"type=\"number\" min=\"1000\" class=\"form-control\" required id=\"exampleInputEmail1\" value=\"\">"
+                                + "                                        </div><br>\n"
+                                + "                                        <input name=\"idProduk\"type=\"text\" hidden value=\"" + prdct_details.getId_produk() + "\">"
+                                + "                                        <button type=\"submit\" class=\"btn btn-primary\">TERIMA REQUEST</button>\n"
+                                + "                                        <button type=\"reset\" class=\"btn btn-secondary\">RESET</button>\n"
+                                + "                                    </form><br>"
+                                + "                                    <button onclick=\"location.href='./seller_confirmTolakProdukRequest?idProdukReq_="+prdct_details.getId_produk()+"';\" class=\"btn btn-danger\">TOLAK REQUEST</button>\n"
                                 + "                </div>\n"
                                 + "            </div>\n"
-                                + "            <table class=\"table table-striped\">\n"
-                                + "                <thead>\n"
-                                + "                    <tr>\n"
-                                + "                        <th>#</th>\n"
-                                + "                        <th style=\"width: 22%;\">Nama Barang Request</th>\n"
-                                + "                        <th style=\"width: 22%;\">Foto Barang</th>"
-                                + "                        <th style=\"width: 22%;\">Opsi</th>"
-                                + "                    </tr>\n"
-                                + "                </thead>\n"
-                                + "                <tbody>\n");
-                        int urutan = 0;
-                        for (int i = 0; i < products.size(); i++) {
-                            urutan = urutan + 1;
-                            out.println("                    <tr>\n"
-                                    + "                        <td>" + urutan + "</td>\n"
-                                    + "                        <td>"+products.get(i).getNama_produk()+"</td>\n"
-                                    + "                        <td><img src=\"./productReqImage_loader?idProdukReq_=" + products.get(i).getId_produk() + "\" width=\"90\" height=\"50\"/></td>\n"
-                                    + "                        <td>\n"
-                                    + "                            <a href=\"./seller_requestProduk_details?idProdukReq_="+products.get(i).getId_produk()+"\" class=\"edit\" title=\"Lihat Detail\" data-toggle=\"tooltip\"><i class=\"material-icons\">remove_red_eye</i></a>\n"
-                                    + "                        </td>\n"
-                                    + "                    </tr>\n");
-                        }
-                        out.println("</table>\n"
-                                + "        </div>"
-                                + "                         </div>\n"
-                                + "                    </div>\n"
+                                + "                 <div class=\"jumbotron\">\n"
+                                + "                    <h2>Foto Produk</h2>\n"
+                                + "                          <div class=\"panel-body\"><center><img src=\"./productReqImage_loader?idProdukReq_=" + prdct_details.getId_produk() + "\" class=\"img-responsive\" width=\"300\" height=\"250\" alt=\"Image\"></center></div>\n"
+                                + ""
                                 + "                </div>\n"
-                                + "            </div>"
-                                + "\n"
-                                + "\n"
-                                + "            </div>\n"
                                 + "            "
                                 + "        </div>\n"
                                 + "        <!-- partial -->\n"
@@ -542,7 +429,7 @@ public class seller_kotakMasuk extends HttpServlet {
                         out.close();
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(seller_kotakMasuk.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(_home_seller.class.getName()).log(Level.SEVERE, null, ex);
                     String pesan_error = ex.getMessage();
                     out.println("<!DOCTYPE html>\n"
                             + "<html lang=\"en\" >\n"
@@ -846,7 +733,6 @@ public class seller_kotakMasuk extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
     }
 
     /**
